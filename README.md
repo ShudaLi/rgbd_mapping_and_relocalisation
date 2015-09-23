@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------------
-                    Dense RGB-D Mapping and Relocalisation                            
+                   Dense RGB-D Mapping and Relocalisation                            
 -------------------------------------------------------------------------------
 
 Introduction
@@ -49,3 +49,8 @@ Demo Video and talk
 - https://youtu.be/TUd86IXQOrA
 - https://youtu.be/gAcEhu5V6-I
 - https://youtu.be/xkFhLtLr5rg  
+
+-------------------------------------------------------------------------------
+
+Project page
+- https://lishuda.wordpress.com/
