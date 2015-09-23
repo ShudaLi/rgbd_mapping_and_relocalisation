@@ -1,39 +1,42 @@
-////////////////////////////////////////////////////////////////////////
-                              Introduction
-////////////////////////////////////////////////////////////////////////
+-------------------------------------------------------------------------------
+                    Dense RGB-D Mapping and Relocalisation                            
+-------------------------------------------------------------------------------
 
+Introduction
 
-This is an open source C++ implementation of [1]. It provides scene mapping
-and fast wide baseline relocalisation without the need for training.
-The code has been tested on both Ubuntu and Windows platforms. 
+This is an open source C++ implementation of [1]. It provides scene mapping and 
+fast and robust wide baseline relocalisation without the need for training. The 
+code has been tested on both Ubuntu and Windows platforms.
 
-[1] RGB-D Relocalisation Using Pairwise Geometry and Concise Key Point
-Sets. Li, S., & Calway, A. ICRA, 2015.
+[1] RGB-D Relocalisation Using Pairwise Geometry and Concise Key Point Sets. 
+Li, S., & Calway, A. ICRA, 2015.
 
-////////////////////////////////////////////////////////////////////////
-                               License
-////////////////////////////////////////////////////////////////////////
+-------------------------------------------------------------------------------
 
-The source code is released under the MIT license. In short, you can
-do anything with the code for any purposes, providing you kindly
-reference our work. For details please view the licence file in the
-source.
+Licenes
 
-////////////////////////////////////////////////////////////////////////
-                              Dependences
-////////////////////////////////////////////////////////////////////////
+The source code is released under the MIT license. In short, you can do 
+anything with the code for any purposes, providing you kindly reference our 
+work. For details please view the licence file in the source.
+
+-------------------------------------------------------------------------------
+
+Dependences
 
 - OpenCV 3.0 (BSD license)
 - Eigen (GNU free software)
 - OpenNI 2 (Apache license)
-- NIFTI (Public domain)
-- ZLIB (Free commercial use)
 - Boost (BSD License)
 - GLEW (Free commercial use)
+- NIFTI (Public domain)
+- ZLIB (Free commercial use)
+- CUDA
 
-////////////////////////////////////////////////////////////////////////
-                         Compilation Instruction
-////////////////////////////////////////////////////////////////////////
-- Windows
+-------------------------------------------------------------------------------
 
-- Ubuntu
+Compilation
+
+- Windows (7/8/8.1/10)
+  https://docs.google.com/document/d/1-THFy0CCAK2jgCwKX78hUfOQn2L0bInoNJH9JiziH18/edit?usp=sharing
+- Ubuntu (14.04/15.04)
+  https://docs.google.com/document/d/13TT0n8cH1gFA_FZZOV2TD97_VfGK10WUeM1pSlsOQ3o/edit?usp=sharing

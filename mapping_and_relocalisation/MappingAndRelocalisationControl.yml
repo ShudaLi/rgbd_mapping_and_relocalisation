@@ -1,0 +1,48 @@
+%YAML:1.0
+
+Global_folder: "..\\live_kinect\\global_model\\"
+#the location stores the global map, the TSDF volume with the concise key point sets
+Result_folder: "..\\live_kinect\\tracking_results\\"
+#the location stores the camera poses over time
+CamParamPathFileName: "..\\data\\Xtion"
+#sensor internal parameters
+
+Ransac_iterations_tracking: 100
+Ransac_iterations_relocalisation: 300
+KNN_tracking: 1
+KNN_relocalisation: 5
+
+uResolution: 1
+uPyrHeight: 3
+bUseNIRegistration: 1
+uCubicGridResolution: [ 512, 512, 512 ]
+fVolumeSize: 3
+Feature_scales: 1
+InitialCamPos: [ 1.5, 1.5, 0 ]
+bDisplayImage: 0
+bLightOn: 1
+nMode: 1
+#1 Live 2 recorder 3 player
+oniFile: "..\\live_kinect\\lab4.oni"
+bRepeat: 0
+nStatus: 9
+
+LoadVolume: 0
+StorePoses: 0
+
+Stage: Tracking_n_Mapping
+#Relocalisation_Only
+
+Feature_Name:
+   - BRISK
+Pose_Estimation:   
+   - AONn2dRansac2
+ICP_Method:
+   - Frm_2_Frm_ICP
+Matching_Method:
+   - IDF
+
+
+
+
+
