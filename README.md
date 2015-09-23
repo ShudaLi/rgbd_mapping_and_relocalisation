@@ -9,7 +9,7 @@ fast and robust wide baseline relocalisation without the need for training. The
 code has been tested on both Ubuntu and Windows platforms.
 
 [1] RGB-D Relocalisation Using Pairwise Geometry and Concise Key Point Sets. 
-Li, S., & Calway, A. ICRA, 2015.
+Li, S., & Calway, A. ICRA, 2015. 
 
 -------------------------------------------------------------------------------
 
@@ -40,3 +40,12 @@ Compilation
   https://docs.google.com/document/d/1-THFy0CCAK2jgCwKX78hUfOQn2L0bInoNJH9JiziH18/edit?usp=sharing
 - Ubuntu (14.04/15.04)
   https://docs.google.com/document/d/13TT0n8cH1gFA_FZZOV2TD97_VfGK10WUeM1pSlsOQ3o/edit?usp=sharing
+  
+-------------------------------------------------------------------------------
+
+Demo Video and talk
+
+- https://lishuda.wordpress.com/
+- https://youtu.be/TUd86IXQOrA
+- https://youtu.be/gAcEhu5V6-I
+- https://youtu.be/xkFhLtLr5rg  
