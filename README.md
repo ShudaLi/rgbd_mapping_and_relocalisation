@@ -1,8 +1,8 @@
 -------------------------------------------------------------------------------
-                   Dense RGB-D Mapping and Relocalisation                            
+# Dense RGB-D Mapping and Relocalisation                            
 -------------------------------------------------------------------------------
 
-Introduction
+## Introduction
 
 This is an open source C++ implementation of [1]. It provides scene mapping and 
 fast and robust wide baseline relocalisation without the need for training. The 
@@ -13,7 +13,7 @@ Li, S., & Calway, A. ICRA, 2015.
 
 -------------------------------------------------------------------------------
 
-Licenes
+## Licenes
 
 The source code is released under the MIT license. In short, you can do 
 anything with the code for any purposes, providing you kindly reference our 
@@ -21,7 +21,7 @@ work. For details please view the licence file in the source.
 
 -------------------------------------------------------------------------------
 
-Dependences
+## Dependences
 
 - OpenCV 3.0 (BSD license)
 - Eigen (GNU free software)
@@ -34,7 +34,7 @@ Dependences
 
 -------------------------------------------------------------------------------
 
-Compilation
+## Compilation
 
 - Windows (7/8/8.1/10)
   https://docs.google.com/document/d/1-THFy0CCAK2jgCwKX78hUfOQn2L0bInoNJH9JiziH18/edit?usp=sharing
@@ -43,7 +43,7 @@ Compilation
   
 -------------------------------------------------------------------------------
 
-Demo Video and talk
+## Demo Video and talk
 
 - https://lishuda.wordpress.com/
 - https://youtu.be/TUd86IXQOrA
@@ -52,5 +52,5 @@ Demo Video and talk
 
 -------------------------------------------------------------------------------
 
-Project page
+## Project page
 - https://lishuda.wordpress.com/
