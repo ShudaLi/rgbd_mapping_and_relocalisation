@@ -17,11 +17,7 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
-//
-//You agree to acknowledge use of the Software in any reports or publications of
-//results obtained with the Software and make reference to the following publication :
-//Li, Shuda, &Calway, Andrew(2015).RGBD Relocalisation Using Pairwise Geometry
-//and Concise Key Point Sets.In Intl Conf.Robotics and Automation.
+
 
 #ifndef PCL_GPU_UTILS_DEVICE_VECTOR_MATH_HPP_
 #define PCL_GPU_UTILS_DEVICE_VECTOR_MATH_HPP_
