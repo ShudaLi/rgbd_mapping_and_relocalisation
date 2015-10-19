@@ -11,13 +11,18 @@ code has been tested on both Ubuntu and Windows platforms.
 [1] RGB-D Relocalisation Using Pairwise Geometry and Concise Key Point Sets. 
 Li, S., & Calway, A. ICRA, 2015. 
 
+Please consider citing above publication if you use this software in your own 
+work.
+
+The repository is maintained by Shuda Li (csxsl@bristol.ac.uk). Feel free to contact
+me, if you have any question or suggestions.
 -------------------------------------------------------------------------------
 
-## Licenes
+## License
 
 The source code is released under the MIT license. In short, you can do 
-anything with the code for any purposes, providing you kindly reference our 
-work. For details please view the licence file in the source.
+anything with the code for any purposes. For details please view the license file 
+in the source codes.
 
 -------------------------------------------------------------------------------
 
