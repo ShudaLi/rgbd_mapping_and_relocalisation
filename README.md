@@ -22,9 +22,12 @@ me, if you have any question or suggestions.
 ## Functional keys
 
 '7'  switch on the dense surface reconstructed.
+
 '0', pressing 0 key once aligns the viewing position of up left sub window with current camera pose only.
      pressing 0 key one more time locks the viewing position with the camera location and pressing 0 again release the lock. 
+	 
 'F5', switch on/off the recorded camera path (red/blue curves)
+
 More key settings can be found in Viewer::keyPressEvent() in the ./live_mapping_and_relocalisation/MultiViewer.cpp 
 
 -------------------------------------------------------------------------------
