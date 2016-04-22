@@ -105,7 +105,6 @@ void convert(const Mat& M_, Eigen::Matrix4f* peiM_){
 	return;
 }
 
-
 CData4Viewer::CData4Viewer(){
 	_uResolution = 0;
 	_uPyrHeight = 3;
@@ -304,6 +303,16 @@ void CData4Viewer::drawGlobalView()
 		_pVirtualGlobalView->gpuRender3DPts(_pGL.get(), 0);
 	}
 	else{
+		if (_pGL->_bEnableLighting){
+			glEnable(GL_LIGHTING); /* glEnable(GL_TEXTURE_2D);*/
+			float diffuseColor[3] = { 0.8f, 0.8f, 0.8f };
+			glColor3fv(diffuseColor);
+		}
+		else{ 
+			glDisable(GL_LIGHTING);/* glEnable(GL_TEXTURE_2D);*/ 
+		}
+		_pCubicGrids->displayTriangles();
+
 		//_pVirtualGlobalView->assignRTfromGL();
 		//_pCubicGridsMoved->gpuRaycast(&*_pVirtualGlobalView, true, _bCapture); //if capturing is on, fineCast is off
 		//_pVirtualGlobalView->gpuRender3DPts(_pGL.get(), 0);
@@ -326,7 +335,6 @@ void CData4Viewer::drawGlobalView()
 		_pGL->renderPatternGL(.1f,20,20);
 		_pGL->renderPatternGL(1.f,10,10);
 		_pCubicGrids->renderBoxGL();
-		//_pGL->renderVoxelGL(_fVolumeSize);
 	}
 	if(_bShowCamera) {
 		_pKinect->_pCurrFrame->copyTo( &*_pCameraView2 );
@@ -345,13 +353,10 @@ void CData4Viewer::drawGlobalView()
 		_pCameraView2->renderCameraInWorld(_pGL.get(), true, aColor, _pGL->_bDisplayCamera, .2f, _pGL->_usLevel);//refine pose
 	}
 	
-	
 	if( _bIsCameraPathOn ){
 		_pTracker->displayCameraPath();
 		_pTracker->displayCameraPathReloc();
 	}
-	_pTracker->displayTrackedKeyPoints();
-	//PRINTSTR("drawGlobalView");
 	return;
 }
 
@@ -364,13 +369,6 @@ void CData4Viewer::drawCameraView(qglviewer::Camera* pCamera_)
 	Eigen::Affine3f init; init.setIdentity(); init(1, 1) = -1.f; init(2, 2) = -1.f;// rotate the default opengl camera orientation to make it facing positive z
 	glLoadMatrixf(init.data());
 	glMultMatrixf(prj_w_t_c.data());
-
-	//if(_bShowCamera) {
-	//	_pTracker->displayGlobalRelocalization();
-	//}
-	//if(_bShowMarkers) {
-	//	_pTracker->displayAllGlobalFeatures(_nVoxelLevel,_bRenderSphere);
-	//}
 
 	_pVirtualCameraView->assignRTfromGL();
 	_pCubicGrids->rayCast(&*_pVirtualCameraView,true,_bCapture); //get virtual frame

@@ -362,7 +362,10 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 			resize(1280, 480);
 		}
 	}
-
+	else if (pEvent_->key() == Qt::Key_M && (pEvent_->modifiers() & Qt::ShiftModifier)){
+		_pData->_pCubicGrids->gpuMarchingCubes();
+		updateGL();
+	}
 	QGLViewer::keyPressEvent(pEvent_);
 }
 

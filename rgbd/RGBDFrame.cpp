@@ -521,7 +521,7 @@ void btl::kinect::CRGBDFrame::gpuRender3DPts(btl::gl_util::CGLUtil::tp_ptr pGL_,
 		glColor3fv(diffuseColor);
 	}
 	else                            	{glDisable(GL_LIGHTING);/* glEnable(GL_TEXTURE_2D);*/}
-	glPointSize(0.1f*(usPyrLevel_+1+_uResolution)*20.f);
+	glPointSize(4.f);
 	if (usPyrLevel_ >= _uPyrHeight) return;
 	//glEnableClientState(GL_VERTEX_ARRAY);
 	//glEnableClientState(GL_NORMAL_ARRAY);

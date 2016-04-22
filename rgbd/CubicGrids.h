@@ -78,6 +78,8 @@ namespace btl{ namespace geometry
 		void renderBoxGL() const;
 		void renderOccupiedVoxels(btl::gl_util::CGLUtil::tp_ptr pGL_, int lvl_);
 		void displayAllGlobalFeatures(int lvl_, bool bRenderSpheres_) const;
+		void displayTriangles() const;
+		void gpuMarchingCubes();
 	public:
 		float _fx, _fy, _cx, _cy;
 		pcl::device::Intr _intrinsics;
@@ -135,6 +137,8 @@ namespace btl{ namespace geometry
 		vector<int> _vOccupied;
 		GLUquadricObj*   _quadratic;	// Storage For Our Quadratic Objects
 
+		Mat _triangles;
+		Mat _normals;
 	};
 
 

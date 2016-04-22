@@ -86,6 +86,7 @@
 #include "RayCaster.cuh"
 #include "FeatureVolume.cuh"
 #include "ICPFrame2Frame.cuh"
+#include "MarchingCubes.cuh"
 
 namespace btl{ namespace geometry
 {
@@ -968,6 +969,60 @@ void CCubicGrids::extractRTFromBuffer(const cuda::GpuMat& cvgmSumBuf_, Eigen::Ma
 	eimRinv = Rinc * eimRinv;
 	*peivTw_ = -eimRinv.transpose() * eivTinv;
 	*peimRw_ = eimRinv.transpose();
+}
+
+void CCubicGrids::gpuMarchingCubes(){
+	GpuMat _occupied_voxels, _triangles_buffer, _normals_buffer;
+	_occupied_voxels.create(3, 7000000, CV_32SC1);
+
+	Mat cpuEdgeTable(1, 256, CV_32SC1, (void*)edgeTable);
+	Mat cpuTriTable(1, 256 * 16, CV_32SC1, (void*)triTable);
+	Mat cpuNumVertsTable(1, 256, CV_32SC1, (void*)numVertsTable);
+	//cout << cpuNumVertsTable << endl;
+	GpuMat eTable(cpuEdgeTable);
+	GpuMat tTable(cpuTriTable);
+	GpuMat nTable(cpuNumVertsTable);
+	pcl::device::bindTextures(GpuMat(cpuEdgeTable), tTable, nTable);
+	int active_voxels = pcl::device::getOccupiedVoxels(_gpu_YXxZ_tsdf, _VolumeResolution, _occupied_voxels);
+	if (active_voxels == 0){
+		pcl::device::unbindTextures();
+		return;
+	}
+	GpuMat occupied_voxels = _occupied_voxels.colRange(0, active_voxels);
+	int _total_vertexes = pcl::device::computeOffsetsAndTotalVertexes(occupied_voxels);
+	cout << _total_vertexes << endl;
+	_triangles_buffer.create(1, _total_vertexes, CV_32FC3);
+	_normals_buffer.create(1, _total_vertexes/3, CV_32FC3);
+	pcl::device::generateTriangles(_gpu_YXxZ_tsdf, occupied_voxels, _fVolumeSizeM, _VolumeResolution, _triangles_buffer, _normals_buffer);
+	_triangles_buffer.colRange(0, _total_vertexes).download(_triangles);
+	_normals_buffer.colRange(0, _total_vertexes / 3).download(_normals);
+	pcl::device::unbindTextures();
+
+	return;
+}
+
+void CCubicGrids::displayTriangles() const{
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	//glMultMatrixd(_T_fw.inverse().matrix().data());//times with original model view matrix manipulated by mouse or keyboard
+
+	assert(_triangles.cols / 3 == _normals.cols);
+	for (int t = 0; t < _normals.cols; t++)
+	{
+		const float* vv = _triangles.ptr<float>() + t * 3 * 3;
+		const float* nn = _normals.ptr<float>() + t * 3;
+
+		glBegin(GL_TRIANGLES);
+		glNormal3fv(nn);
+		glVertex3fv(vv);
+		glVertex3fv(vv + 3);
+		glVertex3fv(vv + 6);
+		glEnd();
+	}
+
+	glPopMatrix();
+	return;
 }
 
 }//geometry
