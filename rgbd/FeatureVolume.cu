@@ -89,7 +89,7 @@ __constant__ int __block_size_y;
 		float tymin = ((dir.y > 0 ? 0.f : __volume_size.y) - __tcurr.y) / dir.y;
 		float tzmin = ((dir.z > 0 ? 0.f : __volume_size.z) - __tcurr.z) / dir.z;
 
-		return fmax ( fmax (txmin, tymin), tzmin);
+		return fmaxf ( fmaxf (txmin, tymin), tzmin);
 	}
 
 	__device__ __forceinline__ float
@@ -99,7 +99,7 @@ __constant__ int __block_size_y;
 		float tymax = ( (dir.y > 0 ? __volume_size.y : 0.f) - __tcurr.y) / dir.y;
 		float tzmax = ( (dir.z > 0 ? __volume_size.z : 0.f) - __tcurr.z) / dir.z;
 
-		return fmin (fmin (txmax, tymax), tzmax);
+		return fminf (fminf (txmax, tymax), tzmax);
 	}
 
 
@@ -346,7 +346,7 @@ struct SDevIntegrateGlobalVolume{
 		//printf("2.1 - r: %d c %d dir %f %f %f\n", y, x, Nl_.x, Nl_.y, Nl_.z);
 
         // computer time when entry and exit volume
-		float time_start_volume = getMinTime(Nl_ /*ray_dir*/); time_start_volume = fmax(time_start_volume, 0.f);
+		float time_start_volume = getMinTime(Nl_ /*ray_dir*/); time_start_volume = fmaxf(time_start_volume, 0.f);
 		float time_exit_volume  = getMaxTime(Nl_ /*ray_dir*/);
         
 		if (time_start_volume >= time_exit_volume)	return;

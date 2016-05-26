@@ -350,7 +350,7 @@ void CData4Viewer::drawGlobalView()
 		_pTracker->displayCameraPath();
 		_pTracker->displayCameraPathReloc();
 	}
-	_pTracker->displayTrackedKeyPoints();
+	//_pTracker->displayTrackedKeyPoints();
 	//PRINTSTR("drawGlobalView");
 	return;
 }
