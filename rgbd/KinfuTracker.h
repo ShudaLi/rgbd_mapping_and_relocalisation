@@ -109,7 +109,6 @@ namespace btl{ namespace geometry
 		string _path_to_result;
 		Ptr<TemplateMatching> _pGpuTM_bw, _pGpuTM_dp;
 		CCubicGrids::tp_shared_ptr _pCubicGrids; //volumetric data
-		CRGBDFrame::tp_scoped_ptr _pPrevFrameWorld;
 
 		btl::image::SCamera::tp_ptr _pRGBCamera; //share the content of the RGBCamera with those from VideoKinectSource
 		Eigen::Affine3f _pose_refined_c_f_w;//projection matrix world to cam
@@ -225,6 +224,7 @@ namespace btl{ namespace geometry
 		int _total_refined_features;
 
 	public:
+		CRGBDFrame::tp_scoped_ptr _pPrevFrameWorld;
 		int _nStage; //tracking, relocalisation
 		int _buffer_size;
 		int _nHessianThreshold;

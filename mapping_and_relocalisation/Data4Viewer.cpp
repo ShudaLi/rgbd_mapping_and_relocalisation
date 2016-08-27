@@ -62,6 +62,7 @@ using namespace std;
 using namespace cv;
 using namespace Eigen;
 using namespace qglviewer;
+using namespace Sophus;
 
 void convert(const Eigen::Affine3f& eiM_, Mat* pM_){
 	pM_->create(4, 4, CV_32FC1);
@@ -125,11 +126,11 @@ CData4Viewer::CData4Viewer(){
 	_bContinuous = false;
 	_bTrackOnly = false;
 	_bShowSurfaces = false;
-        _bShowCamera = false;
-        _bShowVoxels = false;
-        _bShowMarkers = false;
-        _bShowVisualRays = false;
-        _bIsCurrFrameOn = false;
+	_bShowCamera = false;
+	_bShowVoxels = false;
+	_bShowMarkers = false;
+	_bShowVisualRays = false;
+	_bIsCurrFrameOn = false;
 	_nSequenceIdx = 0;
 	_nMethodIdx = 0;
 	_nRound = 0;
@@ -139,6 +140,7 @@ CData4Viewer::CData4Viewer(){
 	_strStage = string("Tracking_n_Mapping");
 	_nVoxelLevel = 0;
 	_bCameraFollow = true;
+	_nNormalMap = NORMAL_MAP;
 	_prj_c_f_w.setIdentity();
 }
 CData4Viewer::~CData4Viewer()
@@ -358,34 +360,44 @@ void CData4Viewer::drawGlobalView()
 
 void CData4Viewer::drawCameraView(qglviewer::Camera* pCamera_)
 {
-	_pKinect->_pRGBCamera->setGLProjectionMatrix( 0.1f,100.f);
-	
-	glMatrixMode(GL_MODELVIEW);
-	Eigen::Affine3f prj_w_t_c; _pTracker->getCurrentProjectionMatrix(&prj_w_t_c);
-	Eigen::Affine3f init; init.setIdentity(); init(1, 1) = -1.f; init(2, 2) = -1.f;// rotate the default opengl camera orientation to make it facing positive z
-	glLoadMatrixf(init.data());
-	glMultMatrixf(prj_w_t_c.data());
-
-	//if(_bShowCamera) {
-	//	_pTracker->displayGlobalRelocalization();
-	//}
-	//if(_bShowMarkers) {
-	//	_pTracker->displayAllGlobalFeatures(_nVoxelLevel,_bRenderSphere);
-	//}
-
-	_pVirtualCameraView->assignRTfromGL();
-	_pCubicGrids->rayCast(&*_pVirtualCameraView,true,_bCapture); //get virtual frame
-	bool bLightingStatus = _pGL->_bEnableLighting;
-	_pGL->_bEnableLighting = true;
-	_pVirtualCameraView->gpuRender3DPts(_pGL.get(),_pGL->_usLevel);
-	_pGL->_bEnableLighting = bLightingStatus;
+	if (_nNormalMap == SHADED_SURFACE)
+	{
+		_pKinect->_pRGBCamera->setGLProjectionMatrix(0.1f, 100.f);
+		glMatrixMode(GL_MODELVIEW);
+		Eigen::Affine3f prj_w_t_c; _pTracker->getCurrentProjectionMatrix(&prj_w_t_c);
+		Eigen::Affine3f init; init.setIdentity(); init(1, 1) = -1.f; init(2, 2) = -1.f;// rotate the default opengl camera orientation to make it facing positive z
+		glLoadMatrixf(init.data());
+		glMultMatrixf(prj_w_t_c.data());
+		_pTracker->_pPrevFrameWorld->copyTo(&*_pVirtualCameraView);
+		_pVirtualCameraView->gpuRender3DPts(_pGL.get(), _pGL->_usLevel);
+	}
+	else if (_nNormalMap == NORMAL_MAP) {
+		_pKinect->_pRGBCamera->setGLProjectionMatrix(0.1f, 100.f);
+		_pTracker->_pPrevFrameWorld->copyTo(&*_pVirtualCameraView);
+		_pVirtualCameraView->convert2NormalMap();
+		glMatrixMode(GL_MODELVIEW);
+		Eigen::Affine3f tmp; tmp.setIdentity();
+		Matrix4f mv = btl::utility::setModelViewGLfromPrj(tmp); //mv transform X_m to X_w i.e. model coordinate to world coordinate
+		glLoadMatrixf(mv.data());
+		_pKinect->_pRGBCamera->renderCameraInLocal(_pVirtualCameraView->_normal_map, _pGL.get(), false, NULL, 0.2f, true); //render in model coordinate
+	}
+	else if(_nNormalMap == DEPTH_MAP) {
+		_pKinect->_pRGBCamera->setGLProjectionMatrix(0.1f, 100.f);
+		_pTracker->_pPrevFrameWorld->copyTo(&*_pVirtualCameraView);
+		_pVirtualCameraView->convertDepth2Gray(_ma);
+		glMatrixMode(GL_MODELVIEW);
+		Eigen::Affine3f tmp; tmp.setIdentity();
+		Matrix4f mv = btl::utility::setModelViewGLfromPrj(tmp); //mv transform X_m to X_w i.e. model coordinate to world coordinate
+		glLoadMatrixf(mv.data());
+		_pKinect->_pRGBCamera->renderCameraInLocal(_pVirtualCameraView->_depth_gray, _pGL.get(), false, NULL, 0.2f, true); //render in model coordinate
+	}
 	//PRINTSTR("drawCameraView");
 	return;	
 }
 
 void CData4Viewer::drawRGBView()
 {
-	_pKinect->_pRGBCamera->setGLProjectionMatrix( 0.1f,100.f);
+	_pKinect->_pRGBCamera->setGLProjectionMatrix(0.1f, 20.f);
 
 	glMatrixMode ( GL_MODELVIEW );
 	Eigen::Affine3f tmp; tmp.setIdentity();
@@ -398,17 +410,36 @@ void CData4Viewer::drawRGBView()
 
 void CData4Viewer::drawDepthView(qglviewer::Camera* pCamera_)
 {
-	_pKinect->_pRGBCamera->setGLProjectionMatrix( 0.01f,20.f);
+	if(_nNormalMap == SHADED_SURFACE)
+	{
+		_pKinect->_pRGBCamera->setGLProjectionMatrix(0.1f, 20.f);
 
-	_pDepth->setRTw( Matrix3f::Identity(),Vector3f(0,0,0) );
-	//_pDepth->gpuTransformToWorldCVCV();
+		_pDepth->setRTw(Matrix3f::Identity(), Vector3f(0, 0, 0));
+		Matrix4f mModelView;
+		_pDepth->getGLModelViewMatrix(&mModelView);
+		Matrix4d mTmp = mModelView.cast<double>();
+		pCamera_->setFromModelViewMatrix(mTmp.data());
 
-	Matrix4f mModelView;
-	_pDepth->getGLModelViewMatrix(&mModelView);
-	Matrix4d mTmp = mModelView.cast<double>(); 
-	pCamera_->setFromModelViewMatrix( mTmp.data() );
+		_pDepth->gpuRender3DPts(_pGL.get(), _pGL->_usLevel);
+	}
+	else if (_nNormalMap == NORMAL_MAP){
+		_pKinect->_pRGBCamera->setGLProjectionMatrix(0.1f, 20.f);
 
-	_pDepth->gpuRender3DPts(_pGL.get(), _pGL->_usLevel);
+		glMatrixMode(GL_MODELVIEW);
+		Eigen::Affine3f tmp; tmp.setIdentity();
+		Matrix4f mv = btl::utility::setModelViewGLfromPrj(tmp); //mv transform X_m to X_w i.e. model coordinate to world coordinate
+		glLoadMatrixf(mv.data());
+		_pKinect->_pRGBCamera->renderCameraInLocal(_pKinect->_pCurrFrame->_normal_map, _pGL.get(), false, NULL, 0.2f, true); //render in model coordinate
+	}
+	else {
+		_pKinect->_pRGBCamera->setGLProjectionMatrix(0.1f, 20.f);
+
+		glMatrixMode(GL_MODELVIEW);
+		Eigen::Affine3f tmp; tmp.setIdentity();
+		Matrix4f mv = btl::utility::setModelViewGLfromPrj(tmp); //mv transform X_m to X_w i.e. model coordinate to world coordinate
+		glLoadMatrixf(mv.data());
+		_pKinect->_pRGBCamera->renderCameraInLocal(_pKinect->_pCurrFrame->_depth_gray, _pGL.get(), false, NULL, 0.2f, true); //render in model coordinate
+	}
 	//PRINTSTR("drawDepthView");
 	return;
 }

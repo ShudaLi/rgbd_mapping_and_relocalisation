@@ -30,6 +30,7 @@ namespace btl { namespace kinect {
 using namespace Eigen;
 using namespace cv;
 using namespace cv::cuda;
+using namespace Sophus;
 
 class DLL_EXPORT CRGBDFrame {
 	//type
@@ -38,6 +39,7 @@ public:
 	typedef boost::scoped_ptr< CRGBDFrame > tp_scoped_ptr;
 	typedef CRGBDFrame* tp_ptr;
 	enum tp_cluster { NORMAL_CLUSTER, DISTANCE_CLUSTER};
+
 
 public:
     CRGBDFrame( btl::image::SCamera::tp_ptr pRGBCamera_, ushort uResolution_, ushort uPyrLevel_, const Eigen::Vector3f& eivCw_ );
@@ -105,6 +107,9 @@ public:
 	void copyTo( CRGBDFrame* pKF_ ) const;
 	void copyImageTo( CRGBDFrame* pKF_ ) const;
 
+	void convert2NormalMap();
+	void convertDepth2Gray(float max_);
+	void exportNormalMap(const string& file_name_) const;
 	void exportYML(const std::string& strPath_, const std::string& strYMLName_);
 	void importYML(const std::string& strPath_, const std::string& strYMLName_);
 
@@ -140,6 +145,8 @@ public:
 	//clusters
 	/*static*/ boost::shared_ptr<cv::Mat> _acvmShrPtrAA[4];//for rendering
 		
+	GpuMat _normal_map;
+	GpuMat _depth_gray;
 	//pose
 	//R & T is the relative pose w.r.t. the coordinate defined in previous camera system.
 	//R & T is defined using CV convention
@@ -151,6 +158,7 @@ public:
 	Matrix3f _Rw; 
 	Vector3f _Tw; 
 	Vector3f _eivInitCw;
+	SE3Group<float> _T_cw;
 	//GL ModelView Matrix
 	//render context
 	//btl::gl_util::CGLUtil::tp_ptr _pGL;

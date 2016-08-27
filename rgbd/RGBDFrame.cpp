@@ -73,6 +73,7 @@
 #include "pcl/internal.h"
 
 using namespace Eigen;
+using namespace Sophus;
 
 btl::kinect::CRGBDFrame::CRGBDFrame( btl::image::SCamera::tp_ptr pRGBCamera_, ushort uResolution_, ushort uPyrLevel_, const Vector3f& eivCw_/*float fCwX_, float fCwY_, float fCwZ_*/ )
 :_pRGBCamera(pRGBCamera_),_uResolution(uResolution_),_uPyrHeight(uPyrLevel_),_eivInitCw(eivCw_){
@@ -208,12 +209,14 @@ void btl::kinect::CRGBDFrame::initRT(){
 		      0.f, 1.f, 0.f,
 			  0.f, 0.f, 1.f;
 	_Tw = -_eivInitCw; 
+	_T_cw = SE3Group<float>(_Rw, _Tw);
 }
 
 void btl::kinect::CRGBDFrame::copyRTFrom(const CRGBDFrame& cFrame_ ){
 	//assign rotation and translation 
 	_Rw = cFrame_._Rw;
 	_Tw = cFrame_._Tw;
+	_T_cw = SE3Group<float>(_Rw, _Tw);
 }
 
 void btl::kinect::CRGBDFrame::assignRTfromGL(){
@@ -256,7 +259,24 @@ void btl::kinect::CRGBDFrame::copyImageTo( CRGBDFrame* pKF_ ) const{
 		_acvgmShrPtrPyrBWs[sLevel_]->copyTo(*pKF_->_acvgmShrPtrPyrBWs[sLevel_]);
 	}
 }
-void btl::kinect::CRGBDFrame::exportYML(const std::string& strPath_, const std::string& strYMLName_){
+
+void btl::kinect::CRGBDFrame::convert2NormalMap() {
+	GpuMat normal;
+	_acvgmShrPtrPyrNls[0]->convertTo(normal, _acvgmShrPtrPyrNls[0]->type(), .5f, .5f);
+	normal.convertTo(_normal_map, CV_8UC3, 255.f);
+}
+
+void btl::kinect::CRGBDFrame::convertDepth2Gray(float max_) {
+	btl::device::cuda_convert_depth_2_gray(*_acvgmShrPtrPyrDepths[0], max_, &_depth_gray);
+	//imwrite("depth.png", Mat(_depth_gray));
+}
+
+void btl::kinect::CRGBDFrame::exportNormalMap(const string& file_name_) const
+{
+	imwrite(file_name_, Mat(_normal_map));
+}
+
+void btl::kinect::CRGBDFrame::exportYML(const std::string& strPath_, const std::string& strYMLName_) {
 	using namespace btl::utility;
 
 	std::string strPathFileName = strPath_ + strYMLName_;
@@ -570,8 +590,8 @@ void btl::kinect::CRGBDFrame::gpuTransformToWorld(const ushort usLevel_){
 	if (usLevel_>=_uPyrHeight) return;
 	GpuMat tmp;
 	btl::device::cuda_transform_local2world(_Rw.data(),_Tw.data(),&*_acvgmShrPtrPyrPts[usLevel_],&*_acvgmShrPtrPyrNls[usLevel_],&tmp);
-	_acvgmShrPtrPyrPts[usLevel_]->download(*_acvmShrPtrPyrPts[usLevel_]);
-	_acvgmShrPtrPyrNls[usLevel_]->download(*_acvmShrPtrPyrNls[usLevel_]);
+	//_acvgmShrPtrPyrPts[usLevel_]->download(*_acvmShrPtrPyrPts[usLevel_]);
+	//_acvgmShrPtrPyrNls[usLevel_]->download(*_acvmShrPtrPyrNls[usLevel_]);
 }//gpuTransformToWorldCVCV()
 
 void btl::kinect::CRGBDFrame::gpuTransformToWorld(){

@@ -92,7 +92,7 @@ CVideoSourceKinect::CVideoSourceKinect (ushort uResolution_, ushort uPyrHeight_,
 	_fSigmaDisparity = 1.f/1.f - 1.f/(1.f+_fThresholdDepthInMeter);
 
 	_bIsSequenceEnds = false;
-	_bFast = false;
+	_bFast = true;
 
 	_fScaleRGB = 1.f;
 	_fScaleDepth = 1.f;
@@ -116,11 +116,11 @@ CVideoSourceKinect::~CVideoSourceKinect()
 
 void CVideoSourceKinect::init()
 {
-	_nMode = SIMPLE_CAPTURING;
+	_nMode = SIMPLE_CAPTURING; 
 	//allocate
 
 	PRINTSTR("Allocate buffers...");
-	_cvmRGB			   .create( __aRGBH[_uResolution], __aRGBW[_uResolution], CV_8UC3 );
+	_cvmRGB		   .create( __aRGBH[_uResolution], __aRGBW[_uResolution], CV_8UC3 );
 	_undist_rgb	   .create( __aRGBH[_uResolution], __aRGBW[_uResolution], CV_8UC3 );
 	_depth_float	   .create( __aDepthH[_uResolution], __aDepthW[_uResolution], CV_32FC1);
 	_undist_depth	   .create( __aDepthH[_uResolution], __aDepthW[_uResolution], CV_32FC1);

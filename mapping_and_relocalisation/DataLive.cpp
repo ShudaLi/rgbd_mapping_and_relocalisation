@@ -59,6 +59,7 @@
 using namespace std;
 using namespace cv;
 using namespace Eigen;
+using namespace Sophus;
 using namespace qglviewer;
 CDataLive::CDataLive()
 :CData4Viewer(){
@@ -231,6 +232,11 @@ void CDataLive::updatePF(){
 		//load data from video source and model
 		if( !_pKinect->getNextFrame(&_nStatus) ) return;
 		_pKinect->_pCurrFrame->copyTo( &*_pDepth );
+		_pKinect->_pCurrFrame->copyTo(&*_pDepth);
+		_pKinect->_pCurrFrame->convert2NormalMap();
+
+		cuda::minMax(*_pKinect->_pCurrFrame->_acvgmShrPtrPyrDepths[0], &_mi, &_ma);
+		_pKinect->_pCurrFrame->convertDepth2Gray(_ma);
 
 		if (!_strStage.compare("Tracking_n_Mapping")){
 			_pTracker->_nStage = btl::Tracking_n_Mapping;
