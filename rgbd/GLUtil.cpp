@@ -19,6 +19,7 @@
 //SOFTWARE.
 
 
+#define _USE_MATH_DEFINES
 #define EXPORT
 #define INFO
 #include <GL/glew.h>

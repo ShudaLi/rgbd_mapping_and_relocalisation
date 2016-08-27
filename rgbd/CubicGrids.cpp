@@ -20,7 +20,7 @@
 
 
 #define EXPORT
-
+#define _USE_MATH_DEFINES
 #define INFO
 #define DEFAULT_TRIANGLES_BUFFER_SIZE 
 //gl
