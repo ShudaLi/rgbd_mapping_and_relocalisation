@@ -65,6 +65,7 @@
 #include <opencv2/core/cuda/common.hpp>
 //eigen
 #include <Eigen/Core>
+#include <se3.hpp>
 //nifti
 #include <nifti/nifti1_io.h>
 #define MIN_HEADER_SIZE 348
@@ -763,11 +764,11 @@ double CCubicGrids::icpFrm2Frm(const CRGBDFrame::tp_ptr pCurFrame_, const CRGBDF
 		// for each pyramid level we have a min energy and corresponding best R t
 		if (asICPIterations_[sPyrLevel] > 0){
 			//PRINT(sPyrLevel);
-			dMinEnergy = btl::device::calc_energy_icp_fr_2_fr ( _intrinsics(sPyrLevel),
-																fDistThreshold, fCosAngleThres,
-																devRwCurTrans, devTwCur, devRwPrev, devTwPrev, *pCurFrame_->_acvgmShrPtrPyrDepths[sPyrLevel],
-																*pPrevFrame_->_acvgmShrPtrPyrPts[sPyrLevel], *pPrevFrame_->_acvgmShrPtrPyrNls[sPyrLevel],
-																*pCurFrame_->_acvgmShrPtrPyrPts[sPyrLevel], *pCurFrame_->_acvgmShrPtrPyrNls[sPyrLevel], *pCurFrame_->_pry_mask[sPyrLevel]);
+			dMinEnergy = btl::device::calc_energy_icp_fr_2_fr(_intrinsics(sPyrLevel),
+				fDistThreshold, fCosAngleThres,
+				devRwCurTrans, devTwCur, devRwPrev, devTwPrev, *pCurFrame_->_acvgmShrPtrPyrDepths[sPyrLevel],
+				*pPrevFrame_->_acvgmShrPtrPyrPts[sPyrLevel], *pPrevFrame_->_acvgmShrPtrPyrNls[sPyrLevel],
+				*pCurFrame_->_acvgmShrPtrPyrPts[sPyrLevel], *pCurFrame_->_acvgmShrPtrPyrNls[sPyrLevel], *pCurFrame_->_pry_mask[sPyrLevel]);
 			//PRINT(dMinEnergy);
 		}
 
@@ -783,8 +784,7 @@ double CCubicGrids::icpFrm2Frm(const CRGBDFrame::tp_ptr pCurFrame_, const CRGBDF
 																	fDistThreshold, fCosAngleThres,
 																	devRwCurTrans, devTwCur, devRwPrev, devTwPrev, *pCurFrame_->_acvgmShrPtrPyrDepths[sPyrLevel],
 																	*pPrevFrame_->_acvgmShrPtrPyrPts[sPyrLevel], *pPrevFrame_->_acvgmShrPtrPyrNls[sPyrLevel],
-																	*pCurFrame_->_acvgmShrPtrPyrPts[sPyrLevel], *pCurFrame_->_acvgmShrPtrPyrNls[sPyrLevel], *pCurFrame_->_pry_mask[sPyrLevel]);
-			//PRINT(dEnergy);
+																	*pCurFrame_->_acvgmShrPtrPyrPts[sPyrLevel], *pCurFrame_->_acvgmShrPtrPyrNls[sPyrLevel], *pCurFrame_->_pry_mask[sPyrLevel]);			////PRINT(dEnergy);
 			if (dEnergy < dMinEnergy) {
 				dMinEnergy = dEnergy;
 				eimRwCurBest = eimRwCurTmp;
@@ -794,6 +794,12 @@ double CCubicGrids::icpFrm2Frm(const CRGBDFrame::tp_ptr pCurFrame_, const CRGBDF
 		eimRwCurTmp = eimRwCurBest;// Note that devRwCurTrans, devTwCur are updated as well
 		eivTwCurTmp = eivTwCurBest;
 	}//for pyrlevel
+	//short sPyrLevel = 0;
+	//dMinEnergy = btl::device::calc_energy_icp_fr_2_fr(_intrinsics(sPyrLevel),
+	//													fDistThreshold, fCosAngleThres,
+	//													devRwCurTrans, devTwCur, devRwPrev, devTwPrev, *pCurFrame_->_acvgmShrPtrPyrDepths[sPyrLevel],
+	//													*pPrevFrame_->_acvgmShrPtrPyrPts[sPyrLevel], *pPrevFrame_->_acvgmShrPtrPyrNls[sPyrLevel],
+	//													*pCurFrame_->_acvgmShrPtrPyrPts[sPyrLevel], *pCurFrame_->_acvgmShrPtrPyrNls[sPyrLevel], *pCurFrame_->_pry_mask[sPyrLevel]);
 
 	return dMinEnergy;
 }

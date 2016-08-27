@@ -1,4 +1,4 @@
-//Copyright(c) 2015 Shuda Li[lishuda1980@gmail.com]
+ //Copyright(c) 2015 Shuda Li[lishuda1980@gmail.com]
 //
 //Permission is hereby granted, free of charge, to any person obtaining a copy
 //of this software and associated documentation files(the "Software"), to deal
@@ -21,6 +21,7 @@
 
 #define EXPORT
 #define INFO
+#define _USE_MATH_DEFINES
 //gl
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -36,14 +37,18 @@
 #include <opencv2/cudawarping.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
+//nifti
+#include <nifti/nifti1_io.h>   /* directly include I/O library functions */
 //boost
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/random.hpp>
 #include <boost/generator_iterator.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/filesystem.hpp>
 //eigen
 #include <Eigen/Core>
+#include <se3.hpp>
 //openni
 #include <OpenNI.h>
 //self
@@ -68,6 +73,7 @@
 using namespace btl::utility;
 using namespace openni;
 using namespace std;
+using namespace Sophus;
 
 namespace btl{ namespace kinect
 {  
@@ -78,19 +84,21 @@ CVideoSourceKinect::CVideoSourceKinect (ushort uResolution_, ushort uPyrHeight_,
 {
 	_eivCw = eivCw_;
 
-	_nRawDataProcessingMethod = 1; //VideoSourceKinect::tp_raw_data_processing_methods::BIFILTER_IN_DISPARITY;
+	_nRawDataProcessingMethod = CVideoSourceKinect::tp_raw_data_processing_methods::BIFILTER_DYNAMIC;
 	//other
 	//definition of parameters
-	_fThresholdDepthInMeter = 0.2f;
+	_fThresholdDepthInMeter = 0.05f;
 	_fSigmaSpace = 4;
-	_fSigmaDisparity = 1.f/4.f - 1.f/(4.f+_fThresholdDepthInMeter);
+	_fSigmaDisparity = 1.f/1.f - 1.f/(1.f+_fThresholdDepthInMeter);
 
 	_bIsSequenceEnds = false;
+	_bFast = false;
 
 	_fScaleRGB = 1.f;
 	_fScaleDepth = 1.f;
 
-	_fCutOffDistance = 3.f;
+	_fCutOffDistance = 10.f;
+	_bMapUndistortionOn = true;
 
 	_fMtr2Depth = 1000.f;
 	std::cout << " Done. " << std::endl;
@@ -176,8 +184,8 @@ void CVideoSourceKinect::initKinect()
 		if (depthWidth != colorWidth || depthHeight != colorHeight)
 		{
 			printf("Warning - expect color and depth to be in same resolution: D: %dx%d, C: %dx%d\n",
-				depthWidth, depthHeight,
-				colorWidth, colorHeight);
+					depthWidth, depthHeight,
+					colorWidth, colorHeight);
 			//return ;
 		}
 	}
@@ -188,6 +196,29 @@ void CVideoSourceKinect::initKinect()
 
 	// set as the highest resolution 0 for 480x640 
 	
+	char _serial[100];
+	int size = sizeof(_serial);
+	_device.getProperty(openni::DEVICE_PROPERTY_SERIAL_NUMBER, &_serial, &size);
+	_serial_number = string(_serial);
+	cout << _serial_number << endl;
+
+	Mat cpuClibXYxZ0, cpuMask0;
+	if (!loadLocation(&_vRegularLocations))
+	{
+		_bMapUndistortionOn = false;
+		return;
+	}
+	loadCoefficient(0, _vRegularLocations.size(), &cpuClibXYxZ0, &cpuMask0);
+	_calibXYxZ[0].upload(cpuClibXYxZ0);
+	_mask[0].upload(cpuMask0);
+	_fCutOffDistance = _vRegularLocations.back();
+
+	if (_uResolution == 1) {
+		btl::device::cuda_resize_coeff(_calibXYxZ[0], &_calibXYxZ[1]);
+		cuda::resize(_mask[0], _mask[1], Size(_mask[0].cols / 2, _mask[0].rows / 2));
+	}
+
+
 	PRINTSTR(" Done.");
 
 	return;
@@ -243,7 +274,7 @@ void CVideoSourceKinect::initPlayer(std::string& strPathFileName_){
 
 	// set as the highest resolution 0 for 480x640 
 	//register the depth generator with the image generator
-	if ( _nRawDataProcessingMethod == BIFILTER_IN_ORIGINAL || _nRawDataProcessingMethod == BIFILTER_IN_DISPARITY ){
+	{
 		nRetVal = _device.setImageRegistrationMode(IMAGE_REGISTRATION_DEPTH_TO_COLOR);
 
 		//nRetVal = _depth.GetAlternativeViewPointCap().getGLModelViewMatrixPoint ( _color );	CHECK_RC_ ( nRetVal, "Getting and setting AlternativeViewPoint failed: " ); 
@@ -337,9 +368,9 @@ bool CVideoSourceKinect::getNextFrame(int* pnStatus_){
 #else
 	cv::Mat cvmRGB(__aRGBH[_uResolution],__aRGBW[_uResolution],CV_8UC3, (unsigned char*)	_colorFrame._getFrame()->data );
 	cv::Mat cvmDep(__aDepthH[_uResolution],__aDepthW[_uResolution],CV_16UC1,(unsigned short*) _depthFrame._getFrame()->data );
-	cvmRGB.copyTo(_cvmRGB);
-	cvmDep.copyTo(_cvmDep);
-	_cvmDep.convertTo(_depth_float,CV_32FC1);
+	_gpu_rgb.upload(cvmRGB);
+	_gpu_depth_float.upload(cvmDep);
+	_gpu_depth_float.convertTo(_gpu_depth,CV_32FC1, 0.001f);
 	
 #endif
 	switch(_nRawDataProcessingMethod){
@@ -348,6 +379,9 @@ bool CVideoSourceKinect::getNextFrame(int* pnStatus_){
 		break;
 	case BIFILTER_IN_DISPARITY:
 		gpuBuildPyramidUseNICVm();
+		break;
+	case BIFILTER_DYNAMIC:
+		gpu_build_pyramid_dynamic_bilatera();
 		break;
 	default:
 		gpuBuildPyramidUseNICVm();
@@ -360,82 +394,83 @@ bool CVideoSourceKinect::getNextFrame(int* pnStatus_){
  
 void CVideoSourceKinect::gpuBuildPyramidUseNICVmBiFilteringInOriginalDepth( ){
 
-	_gpu_rgb.upload(_cvmRGB);
-	_gpu_depth.upload(_depth_float);
+	if (_bMapUndistortionOn) {
+		btl::device::undistortion_depth(_calibXYxZ[_uResolution], _mask[_uResolution], _vRegularLocations[0],
+										_vRegularLocations[1] - _vRegularLocations[0], &_gpu_depth);
+	}
 	//resize the rgbd video source
 	if ( fabs( _fScaleRGB-1.f ) > 0.00005f ) { cuda::resize( _gpu_rgb, _gpu_rgb, Size(), _fScaleRGB, _fScaleRGB, INTER_LINEAR ); }
 	if ( fabs( _fScaleDepth-1.f ) > 0.00005f ){	cuda::resize( _gpu_depth, _gpu_depth, Size(), _fScaleDepth, _fScaleDepth, INTER_LINEAR ); }
 	//undistort
-	_pCurrFrame->_acvgmShrPtrPyrRGBs[0]->setTo(0);//clear(RGB)
 	_pRGBCamera->gpuUndistort(_gpu_rgb, &*_pCurrFrame->_acvgmShrPtrPyrRGBs[0]);//undistort rgb if linear interpolation is used, this may introduce some noises
-	_gpu_undist_depth.setTo( 0 );//clear(_cvgmUndistDepth)
 	_pRGBCamera->gpuUndistort(_gpu_depth, &_gpu_undist_depth);//undistort depth
 	//get bw
 	cv::cuda::cvtColor(*_pCurrFrame->_acvgmShrPtrPyrRGBs[0],*_pCurrFrame->_acvgmShrPtrPyrBWs[0],cv::COLOR_RGB2GRAY);
 	//bilateral filtering (comments off the following three lines to get raw depth map image of kinect)
-	_gpu_undist_depth.convertTo(_gpu_depth,CV_32FC1,1.f/_fMtr2Depth);
-	btl::device::cuda_bilateral_filtering(_gpu_depth,_fSigmaSpace,_fThresholdDepthInMeter,&*_pCurrFrame->_acvgmShrPtrPyrDepths[0]);
+	btl::device::cuda_bilateral_filtering(_gpu_undist_depth,_fSigmaSpace,_fThresholdDepthInMeter,&*_pCurrFrame->_acvgmShrPtrPyrDepths[0]);
+	//_gpu_depth.copyTo(*_pCurrFrame->_acvgmShrPtrPyrDepths[0]);
 	//get pts and nls
-	_pCurrFrame->_acvgmShrPtrPyrPts[0]->setTo(0.f);
-	_pCurrFrame->_acvgmShrPtrPyrNls[0]->setTo(0.f);
 	btl::device::cuda_unproject_rgb(*_pCurrFrame->_acvgmShrPtrPyrDepths[0],_pRGBCamera->_fFx,_pRGBCamera->_fFy,_pRGBCamera->_u,_pRGBCamera->_v, 0,&*_pCurrFrame->_acvgmShrPtrPyrPts[0] );
-	btl::device::cuda_fast_normal_estimation(*_pCurrFrame->_acvgmShrPtrPyrPts[0],&*_pCurrFrame->_acvgmShrPtrPyrNls[0]);
-	
+	if (_bFast) {
+		btl::device::cuda_fast_normal_estimation(*_pCurrFrame->_acvgmShrPtrPyrPts[0], &*_pCurrFrame->_acvgmShrPtrPyrNls[0]);//_vcvgmPyrNls[0]);
+	}
+	else {
+		btl::device::cuda_estimate_normals(*_pCurrFrame->_acvgmShrPtrPyrPts[0], &*_pCurrFrame->_acvgmShrPtrPyrNls[0], &*_pCurrFrame->_acvgmShrPtrPyrReliability[0]);
+	}
+
 	//down-sampling
 	for( unsigned int i=1; i<_uPyrHeight; i++ )	{
-		_pCurrFrame->_acvgmShrPtrPyrRGBs[i]->setTo(0);
 		cv::cuda::pyrDown(*_pCurrFrame->_acvgmShrPtrPyrRGBs[i-1],*_pCurrFrame->_acvgmShrPtrPyrRGBs[i]); //down-sampling rgb
 		cv::cuda::cvtColor(*_pCurrFrame->_acvgmShrPtrPyrRGBs[i],*_pCurrFrame->_acvgmShrPtrPyrBWs[i],cv::COLOR_RGB2GRAY); //convert 2 bw
-		_pCurrFrame->_acvgmShrPtrPyr32FC1Tmp[i]->setTo(0);
 		cv::cuda::resize(*_pCurrFrame->_acvgmShrPtrPyrDepths[i-1],*_pCurrFrame->_acvgmShrPtrPyr32FC1Tmp[i],_pCurrFrame->_acvgmShrPtrPyr32FC1Tmp[i]->size(),0,0,cv::INTER_LINEAR);//down-sampling depth
 		//bilateral filtering (comments off the following three lines to get raw depth map image of kinect)
 		btl::device::cuda_bilateral_filtering(*_pCurrFrame->_acvgmShrPtrPyr32FC1Tmp[i],_fSigmaSpace,_fThresholdDepthInMeter,&*_pCurrFrame->_acvgmShrPtrPyrDepths[i]);
 		//get pts and nls
-		_pCurrFrame->_acvgmShrPtrPyrPts[i]->setTo(0.f);
-		_pCurrFrame->_acvgmShrPtrPyrNls[i]->setTo(0.f);
 		btl::device::cuda_unproject_rgb(*_pCurrFrame->_acvgmShrPtrPyrDepths[i],_pRGBCamera->_fFx,_pRGBCamera->_fFy,_pRGBCamera->_u,_pRGBCamera->_v, i,&*_pCurrFrame->_acvgmShrPtrPyrPts[i] );
-		btl::device::cuda_fast_normal_estimation(*_pCurrFrame->_acvgmShrPtrPyrPts[i],&*_pCurrFrame->_acvgmShrPtrPyrNls[i]);
+		if (i!=2) {
+			btl::device::cuda_fast_normal_estimation(*_pCurrFrame->_acvgmShrPtrPyrPts[i], &*_pCurrFrame->_acvgmShrPtrPyrNls[i]);
+		}
+		else {
+			btl::device::cuda_estimate_normals(*_pCurrFrame->_acvgmShrPtrPyrPts[i], &*_pCurrFrame->_acvgmShrPtrPyrNls[i], &*_pCurrFrame->_acvgmShrPtrPyrReliability[i]);
+		}
 	}	
 
 	for( unsigned int i=0; i<_uPyrHeight; i++ )	{
 		_pCurrFrame->_acvgmShrPtrPyrRGBs[i]->download(*_pCurrFrame->_acvmShrPtrPyrRGBs[i]);
 		_pCurrFrame->_acvgmShrPtrPyrBWs[i]->download(*_pCurrFrame->_acvmShrPtrPyrBWs[i]);
-		_pCurrFrame->_acvgmShrPtrPyrPts[i]->download(*_pCurrFrame->_acvmShrPtrPyrPts[i]);
-		_pCurrFrame->_acvgmShrPtrPyrNls[i]->download(*_pCurrFrame->_acvmShrPtrPyrNls[i]);
+		//_pCurrFrame->_acvgmShrPtrPyrPts[i]->download(*_pCurrFrame->_acvmShrPtrPyrPts[i]);
+		//_pCurrFrame->_acvgmShrPtrPyrNls[i]->download(*_pCurrFrame->_acvmShrPtrPyrNls[i]);
 		//scale the depth map
 		btl::device::cuda_scale_depth(i,_pRGBCamera->_fFx,_pRGBCamera->_fFy,_pRGBCamera->_u,_pRGBCamera->_v,&*_pCurrFrame->_acvgmShrPtrPyrDepths[i]);
-		_pCurrFrame->_acvgmShrPtrPyrDepths[i]->download(*_pCurrFrame->_acvmShrPtrPyrDepths[i]);
+		//_pCurrFrame->_acvgmShrPtrPyrDepths[i]->download(*_pCurrFrame->_acvmShrPtrPyrDepths[i]);
 	}
 	return;
 } 
 void CVideoSourceKinect::gpuBuildPyramidUseNICVm( ){
 	
-	_gpu_rgb.upload(_cvmRGB);
-	_gpu_depth.upload(_depth_float);
+	if (_bMapUndistortionOn) {
+		btl::device::undistortion_depth(_calibXYxZ[_uResolution], _mask[_uResolution], _vRegularLocations[0],
+			_vRegularLocations[1] - _vRegularLocations[0], &_gpu_depth);
+	}
 	
 	if ( fabs( _fScaleRGB-1.f ) > 0.00005f ) { cuda::resize( _gpu_rgb, _gpu_rgb, Size(), _fScaleRGB, _fScaleRGB, INTER_LINEAR ); }
 	if ( fabs( _fScaleDepth-1.f ) > 0.00005f ){ cuda::resize( _gpu_depth, _gpu_depth, Size(), _fScaleDepth, _fScaleDepth, INTER_LINEAR ); }
 
-	_pCurrFrame->_acvgmShrPtrPyrRGBs[0]->setTo(0);//clear(RGB)
-
-	//cv::Mat cvmTmp;//for debug
-	//_cvgmRGB.download(cvmTmp);
-	//cv::imwrite("tmp1.png",cvmTmp);
-
 	_pRGBCamera->gpuUndistort(_gpu_rgb, &*_pCurrFrame->_acvgmShrPtrPyrRGBs[0]);
-
-	//_cvgmUndistDepth.setTo(std::numeric_limits<float>::quiet_NaN());//clear(_cvgmUndistDepth)
-	_gpu_undist_depth.setTo( 0 );//clear(_cvgmUndistDepth)
 	_pRGBCamera->gpuUndistort(_gpu_depth, &_gpu_undist_depth);
 
 	//bilateral filtering (comments off the following three lines to get raw depth map image of kinect)
- 	btl::device::cuda_depth2disparity2(_gpu_undist_depth,_fCutOffDistance, &*_pCurrFrame->_acvgmShrPtrPyr32FC1Tmp[0],_fMtr2Depth);//convert depth from mm to m
+ 	btl::device::cuda_depth2disparity2(_gpu_undist_depth,_fCutOffDistance, &*_pCurrFrame->_acvgmShrPtrPyr32FC1Tmp[0],1.f);//convert depth from mm to m
 	btl::device::cuda_bilateral_filtering(*_pCurrFrame->_acvgmShrPtrPyr32FC1Tmp[0],_fSigmaSpace,_fSigmaDisparity,&*_pCurrFrame->_acvgmShrPtrPyrDisparity[0]);
 	btl::device::cuda_disparity2depth(*_pCurrFrame->_acvgmShrPtrPyrDisparity[0],&*_pCurrFrame->_acvgmShrPtrPyrDepths[0]);
 	//get pts and nls
 	btl::device::cuda_unproject_rgb(*_pCurrFrame->_acvgmShrPtrPyrDepths[0],_pRGBCamera->_fFx,_pRGBCamera->_fFy,_pRGBCamera->_u,_pRGBCamera->_v, 0,&*_pCurrFrame->_acvgmShrPtrPyrPts[0] );
-	//btl::device::cudaFastNormalEstimation(*_pCurrFrame->_acvgmShrPtrPyrPts[0],&*_pCurrFrame->_acvgmShrPtrPyrNls[0]);//_vcvgmPyrNls[0]);
-	btl::device::cuda_estimate_normals(*_pCurrFrame->_acvgmShrPtrPyrPts[0], &*_pCurrFrame->_acvgmShrPtrPyrNls[0], &*_pCurrFrame->_acvgmShrPtrPyrReliability[0]);
+	if (_bFast) {
+		btl::device::cuda_fast_normal_estimation(*_pCurrFrame->_acvgmShrPtrPyrPts[0], &*_pCurrFrame->_acvgmShrPtrPyrNls[0]);//_vcvgmPyrNls[0]);
+	}
+	else {
+		btl::device::cuda_estimate_normals(*_pCurrFrame->_acvgmShrPtrPyrPts[0], &*_pCurrFrame->_acvgmShrPtrPyrNls[0], &*_pCurrFrame->_acvgmShrPtrPyrReliability[0]);
+	}
 	//generate black and white
 	cv::cuda::cvtColor(*_pCurrFrame->_acvgmShrPtrPyrRGBs[0],*_pCurrFrame->_acvgmShrPtrPyrBWs[0],cv::COLOR_RGB2GRAY);
 
@@ -444,54 +479,87 @@ void CVideoSourceKinect::gpuBuildPyramidUseNICVm( ){
 		_pCurrFrame->_acvgmShrPtrPyrRGBs[i]->setTo(0);
 		cv::cuda::pyrDown(*_pCurrFrame->_acvgmShrPtrPyrRGBs[i-1],*_pCurrFrame->_acvgmShrPtrPyrRGBs[i]);
 		cv::cuda::cvtColor(*_pCurrFrame->_acvgmShrPtrPyrRGBs[i],*_pCurrFrame->_acvgmShrPtrPyrBWs[i],cv::COLOR_RGB2GRAY);
-		//_pCurrFrame->_acvgmShrPtrPyr32FC1Tmp[i]->setTo(std::numeric_limits<float>::quiet_NaN());
-		_pCurrFrame->_acvgmShrPtrPyr32FC1Tmp[i]->setTo( 0 );
-		//btl::device::cudaPyrDown( *_pFrame->_acvgmShrPtrPyrDisparity[i-1],_fSigmaDisparity,&*_pFrame->_acvgmShrPtrPyr32FC1Tmp[i]);//need to compare the performance of cudaPyDown() with resize()
 		cv::cuda::resize(*_pCurrFrame->_acvgmShrPtrPyrDisparity[i-1],*_pCurrFrame->_acvgmShrPtrPyr32FC1Tmp[i],_pCurrFrame->_acvgmShrPtrPyr32FC1Tmp[i]->size(),0,0,cv::INTER_LINEAR);
 		btl::device::cuda_bilateral_filtering(*_pCurrFrame->_acvgmShrPtrPyr32FC1Tmp[i],_fSigmaSpace,_fSigmaDisparity,&*_pCurrFrame->_acvgmShrPtrPyrDisparity[i]);
 		btl::device::cuda_disparity2depth(*_pCurrFrame->_acvgmShrPtrPyrDisparity[i],&*_pCurrFrame->_acvgmShrPtrPyrDepths[i]);
 		btl::device::cuda_unproject_rgb(*_pCurrFrame->_acvgmShrPtrPyrDepths[i],_pRGBCamera->_fFx,_pRGBCamera->_fFy,_pRGBCamera->_u,_pRGBCamera->_v, i,&*_pCurrFrame->_acvgmShrPtrPyrPts[i] );
-		btl::device::cuda_estimate_normals(*_pCurrFrame->_acvgmShrPtrPyrPts[i], &*_pCurrFrame->_acvgmShrPtrPyrNls[i], &*_pCurrFrame->_acvgmShrPtrPyrReliability[i]);
-		//btl::device::cudaFastNormalEstimation(*_pCurrFrame->_acvgmShrPtrPyrPts[i],&*_pCurrFrame->_acvgmShrPtrPyrNls[i]);
-	}	
+		if (i!=2) {
+			btl::device::cuda_fast_normal_estimation(*_pCurrFrame->_acvgmShrPtrPyrPts[i], &*_pCurrFrame->_acvgmShrPtrPyrNls[i]);
+		}
+		else {
+			btl::device::cuda_estimate_normals(*_pCurrFrame->_acvgmShrPtrPyrPts[i], &*_pCurrFrame->_acvgmShrPtrPyrNls[i], &*_pCurrFrame->_acvgmShrPtrPyrReliability[i]);
+		}
+	}
 
 	for( unsigned int i=0; i<_uPyrHeight; i++ )	{
 		_pCurrFrame->_acvgmShrPtrPyrRGBs[i]->download(*_pCurrFrame->_acvmShrPtrPyrRGBs[i]);
 		_pCurrFrame->_acvgmShrPtrPyrBWs[i]->download(*_pCurrFrame->_acvmShrPtrPyrBWs[i]);
-		_pCurrFrame->_acvgmShrPtrPyrPts[i]->download(*_pCurrFrame->_acvmShrPtrPyrPts[i]);
-		_pCurrFrame->_acvgmShrPtrPyrNls[i]->download(*_pCurrFrame->_acvmShrPtrPyrNls[i]);
-		_pCurrFrame->_acvgmShrPtrPyrReliability[i]->download(*_pCurrFrame->_acvmShrPtrPyrReliability[i]);
-		//if (i == _uPyrHeight-2)
-		//{
-		//	Mat disp;
-		//	_pCurrFrame->_acvmShrPtrPyrReliability[i]->convertTo(disp, CV_8UC1, 255 );
-		//	applyColorMap(disp, disp, ColormapTypes::COLORMAP_JET); //img0 can only be grayscale or rgb image
-		//	imwrite("reliability1.png", disp);
-		//	cv::cvtColor(*_pCurrFrame->_acvmShrPtrPyrRGBs[i], disp, CV_RGB2BGR);
-		//	imwrite("rgb1.png", disp);
-		//}
-		//else if (i== _uPyrHeight-1)
-		//{
-		//	Mat disp;
-		//	_pCurrFrame->_acvmShrPtrPyrReliability[i]->convertTo(disp, CV_8UC1, 255);
-		//	applyColorMap(disp, disp, ColormapTypes::COLORMAP_JET); //img0 can only be grayscale or rgb image
-		//	imwrite("reliability2.png", disp);
-		//	cv::cvtColor(*_pCurrFrame->_acvmShrPtrPyrRGBs[i], disp, CV_RGB2BGR);
-		//	imwrite("rgb2.png", disp);
-		//}
-		//else if (i == 0)
-		//{
-		//	Mat disp;
-		//	_pCurrFrame->_acvmShrPtrPyrReliability[i]->convertTo(disp, CV_8UC1, 255);
-		//	applyColorMap(disp, disp, ColormapTypes::COLORMAP_JET); //img0 can only be grayscale or rgb image
-		//	imwrite("reliability0.png", disp);
-		//	cv::cvtColor(*_pCurrFrame->_acvmShrPtrPyrRGBs[i], disp, CV_RGB2BGR);
-		//	imwrite("rgb0.png", disp);
-		//}
 		//scale the depth map
 		btl::device::cuda_scale_depth(i,_pRGBCamera->_fFx,_pRGBCamera->_fFy,_pRGBCamera->_u,_pRGBCamera->_v,&*_pCurrFrame->_acvgmShrPtrPyrDepths[i]);
-		_pCurrFrame->_acvgmShrPtrPyrDepths[i]->download(*_pCurrFrame->_acvmShrPtrPyrDepths[i]);
 	}
+	return;
+}
+
+void CVideoSourceKinect::gpu_build_pyramid_dynamic_bilatera() {
+
+	if (_bMapUndistortionOn) {
+		btl::device::undistortion_depth(_calibXYxZ[_uResolution], _mask[_uResolution], _vRegularLocations[0], 
+			                            _vRegularLocations[1] - _vRegularLocations[0], &_gpu_depth);
+	}
+
+	if (fabs(_fScaleRGB - 1.f) > 0.00005f) { cuda::resize(_gpu_rgb, _gpu_rgb, Size(), _fScaleRGB, _fScaleRGB, INTER_LINEAR); }
+	if (fabs(_fScaleDepth - 1.f) > 0.00005f) { cuda::resize(_gpu_depth, _gpu_depth, Size(), _fScaleDepth, _fScaleDepth, INTER_LINEAR); }
+
+	_pRGBCamera->gpuUndistort(_gpu_rgb, &*_pCurrFrame->_acvgmShrPtrPyrRGBs[0]);
+	_pRGBCamera->gpuUndistort(_gpu_depth, &_gpu_undist_depth);
+	//bilateral filtering (comments off the following three lines to get raw depth map image of kinect)
+	btl::device::cuda_bilateral_filtering(_gpu_undist_depth, _fSigmaSpace, &*_pCurrFrame->_acvgmShrPtrPyrDepths[0]);
+	//get pts and nls
+	btl::device::cuda_unproject_rgb(*_pCurrFrame->_acvgmShrPtrPyrDepths[0], _pRGBCamera->_fFx, _pRGBCamera->_fFy, _pRGBCamera->_u, _pRGBCamera->_v, 0, &*_pCurrFrame->_acvgmShrPtrPyrPts[0]);
+	if (_bFast) {
+		btl::device::cuda_fast_normal_estimation(*_pCurrFrame->_acvgmShrPtrPyrPts[0], &*_pCurrFrame->_acvgmShrPtrPyrNls[0]);//_vcvgmPyrNls[0]);
+	}
+	else {
+		btl::device::cuda_estimate_normals(*_pCurrFrame->_acvgmShrPtrPyrPts[0], &*_pCurrFrame->_acvgmShrPtrPyrNls[0], &*_pCurrFrame->_acvgmShrPtrPyrReliability[0]);
+	}
+	//generate black and white
+	cv::cuda::cvtColor(*_pCurrFrame->_acvgmShrPtrPyrRGBs[0], *_pCurrFrame->_acvgmShrPtrPyrBWs[0], cv::COLOR_RGB2GRAY);
+
+	//down-sampling
+	for (unsigned int i = 1; i < _uPyrHeight; i++) {
+		cv::cuda::pyrDown(*_pCurrFrame->_acvgmShrPtrPyrRGBs[i - 1], *_pCurrFrame->_acvgmShrPtrPyrRGBs[i]);
+		cv::cuda::cvtColor(*_pCurrFrame->_acvgmShrPtrPyrRGBs[i], *_pCurrFrame->_acvgmShrPtrPyrBWs[i], cv::COLOR_RGB2GRAY);
+		cv::cuda::resize(*_pCurrFrame->_acvgmShrPtrPyrDepths[i-1], *_pCurrFrame->_acvgmShrPtrPyr32FC1Tmp[i], _pCurrFrame->_acvgmShrPtrPyr32FC1Tmp[i]->size(), 0, 0, cv::INTER_LINEAR);
+		btl::device::cuda_bilateral_filtering(*_pCurrFrame->_acvgmShrPtrPyr32FC1Tmp[i], _fSigmaSpace, &*_pCurrFrame->_acvgmShrPtrPyrDepths[i]);
+		btl::device::cuda_unproject_rgb(*_pCurrFrame->_acvgmShrPtrPyrDepths[i], _pRGBCamera->_fFx, _pRGBCamera->_fFy, _pRGBCamera->_u, _pRGBCamera->_v, i, &*_pCurrFrame->_acvgmShrPtrPyrPts[i]);
+		if (i != 2) {
+			btl::device::cuda_fast_normal_estimation(*_pCurrFrame->_acvgmShrPtrPyrPts[i], &*_pCurrFrame->_acvgmShrPtrPyrNls[i]);
+		}
+		else {
+			btl::device::cuda_estimate_normals(*_pCurrFrame->_acvgmShrPtrPyrPts[i], &*_pCurrFrame->_acvgmShrPtrPyrNls[i], &*_pCurrFrame->_acvgmShrPtrPyrReliability[i]);
+		}
+	}
+
+	for (unsigned int i = 0; i < _uPyrHeight; i++) {
+		_pCurrFrame->_acvgmShrPtrPyrRGBs[i]->download(*_pCurrFrame->_acvmShrPtrPyrRGBs[i]);
+		_pCurrFrame->_acvgmShrPtrPyrBWs[i]->download(*_pCurrFrame->_acvmShrPtrPyrBWs[i]);
+		//_pCurrFrame->_acvgmShrPtrPyrPts[i]->download(*_pCurrFrame->_acvmShrPtrPyrPts[i]);
+		//_pCurrFrame->_acvgmShrPtrPyrNls[i]->download(*_pCurrFrame->_acvmShrPtrPyrNls[i]);
+		
+		//scale the depth map
+		btl::device::cuda_scale_depth(i, _pRGBCamera->_fFx, _pRGBCamera->_fFy, _pRGBCamera->_u, _pRGBCamera->_v, &*_pCurrFrame->_acvgmShrPtrPyrDepths[i]);
+		//_pCurrFrame->_acvgmShrPtrPyrDepths[i]->download(*_pCurrFrame->_acvmShrPtrPyrDepths[i]);
+	}
+
+	if (false)
+	{
+		Mat rel, disp; 
+		_pCurrFrame->_acvgmShrPtrPyrReliability[2]->download(rel);
+		rel.convertTo(disp, CV_8UC1, 255);
+		applyColorMap(disp, disp, ColormapTypes::COLORMAP_JET); //img0 can only be grayscale or rgb image
+		imwrite("reliability1.png", disp);
+	}
+
 	return;
 }
 
@@ -541,7 +609,7 @@ Status CVideoSourceKinect::setVideoMode(ushort uResolutionLevel_){
 			return nRetVal;
 		}
 		//register the depth generator with the image generator
-		if ( _nRawDataProcessingMethod == BIFILTER_IN_ORIGINAL || _nRawDataProcessingMethod == BIFILTER_IN_DISPARITY ){
+		{
 			nRetVal = _device.setImageRegistrationMode(IMAGE_REGISTRATION_DEPTH_TO_COLOR);
 
 			//nRetVal = _depth.GetAlternativeViewPointCap().SetViewPoint ( _color );	CHECK_RC_ ( nRetVal, "Getting and setting AlternativeViewPoint failed: " ); 
@@ -562,7 +630,7 @@ Status CVideoSourceKinect::setVideoMode(ushort uResolutionLevel_){
 			return nRetVal;
 		}
 		//register the depth generator with the image generator
-		if ( _nRawDataProcessingMethod == BIFILTER_IN_ORIGINAL || _nRawDataProcessingMethod == BIFILTER_IN_DISPARITY ){
+		{
 			nRetVal = _device.setImageRegistrationMode(IMAGE_REGISTRATION_DEPTH_TO_COLOR);
 
 			//nRetVal = _depth.GetAlternativeViewPointCap().SetViewPoint ( _color );	CHECK_RC_ ( nRetVal, "Getting and setting AlternativeViewPoint failed: " ); 
@@ -583,7 +651,7 @@ Status CVideoSourceKinect::setVideoMode(ushort uResolutionLevel_){
 			return nRetVal;
 		}
 		//register the depth generator with the image generator
-		if ( _nRawDataProcessingMethod == BIFILTER_IN_ORIGINAL || _nRawDataProcessingMethod == BIFILTER_IN_DISPARITY ){
+		{
 			nRetVal = _device.setImageRegistrationMode(IMAGE_REGISTRATION_DEPTH_TO_COLOR);
 
 			//nRetVal = _depth.GetAlternativeViewPointCap().SetViewPoint ( _color );	CHECK_RC_ ( nRetVal, "Getting and setting AlternativeViewPoint failed: " ); 
@@ -601,7 +669,8 @@ Status CVideoSourceKinect::setVideoMode(ushort uResolutionLevel_){
 			return nRetVal;
 		}
 		//register the depth generator with the image generator
-		if ( _nRawDataProcessingMethod == BIFILTER_IN_ORIGINAL || _nRawDataProcessingMethod == BIFILTER_IN_DISPARITY ){
+		{	
+		
 			nRetVal = _device.setImageRegistrationMode(IMAGE_REGISTRATION_DEPTH_TO_COLOR);
 
 			//nRetVal = _depth.GetAlternativeViewPointCap().SetViewPoint ( _color );	CHECK_RC_ ( nRetVal, "Getting and setting AlternativeViewPoint failed: " ); 
@@ -623,6 +692,55 @@ Status CVideoSourceKinect::setVideoMode(ushort uResolutionLevel_){
 	}
 	
 	return nRetVal;
+}
+
+
+bool CVideoSourceKinect::loadCoefficient(int nResolution_, int size_, Mat* coeff_, Mat* mask_)
+{
+	{
+		ostringstream directory;
+		directory << "..//data//" << _serial_number << "//mask_0.png";
+		*mask_ = imread(directory.str().c_str(), IMREAD_GRAYSCALE);
+	}
+	int nRows, nCols;
+	if (nResolution_ == 0) {
+		nRows = 480;
+		nCols = 640;
+	}
+	else {
+		nRows = 240;
+		nCols = 320;
+	}
+
+	coeff_->create(nCols * nRows, size_, CV_32FC1);
+	ostringstream volume_name;
+
+	volume_name << "..//data//" << _serial_number << "//coefficient_" << nResolution_ << ".nii.gz";
+
+	nifti_image* ptr_nim = nifti_image_read(volume_name.str().c_str(), 1);
+
+	if (coeff_->type() == CV_32FC1) {
+		memcpy((void*)coeff_->data, ptr_nim->data, sizeof(float) * nCols * nRows * size_);
+	}
+
+	nifti_image_free(ptr_nim);
+	return true;
+}
+
+bool CVideoSourceKinect::loadLocation(vector<float>* pvLocations_)
+{
+	pvLocations_->clear();
+	ostringstream locName;
+	locName << "..//data//" << _serial_number << "//RegularLocations.yml";
+	if (!boost::filesystem::exists(locName.str().c_str()))
+	{
+		return false;
+	}
+	cv::FileStorage storage(locName.str().c_str(), cv::FileStorage::READ);
+	storage["locations"] >> *pvLocations_;
+	storage.release();
+
+	return true;
 }
 
 } //namespace kinect

@@ -5,6 +5,7 @@
 * @version 1.0
 * @date 2015-07-15
 */
+#define _USE_MATH_DEFINES
 #define INFO
 #define TIMER
 #include <GL/glew.h>
@@ -41,6 +42,7 @@
 #include <OpenNI.h>
 #include "Kinect.h"
 #include "EigenUtil.hpp"
+#include <se3.hpp>
 #include "GLUtil.hpp"
 #include <map>
 #include "Camera.h"
@@ -49,6 +51,7 @@
 #include "pcl/internal.h"
 #include "CubicGrids.h"
 #include "KinfuTracker.h"
+#include <se3.hpp>
 
 //Qt
 #include <QResizeEvent>

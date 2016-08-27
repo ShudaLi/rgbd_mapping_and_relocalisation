@@ -1,5 +1,6 @@
 ﻿#define INFO
 #define TIMER
+#define _USE_MATH_DEFINES
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 
@@ -42,6 +43,7 @@
 #include <opencv2/cudaarithm.hpp>
 #include <OpenNI.h>
 #include "Kinect.h"
+#include <se3.hpp>
 #include "EigenUtil.hpp"
 #include "GLUtil.hpp"
 #include <map>
@@ -350,7 +352,6 @@ void CData4Viewer::drawGlobalView()
 		_pTracker->displayCameraPath();
 		_pTracker->displayCameraPathReloc();
 	}
-	_pTracker->displayTrackedKeyPoints();
 	//PRINTSTR("drawGlobalView");
 	return;
 }

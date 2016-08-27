@@ -38,6 +38,7 @@
 #include <vector>
 #include <Eigen/Dense>
 #include <Eigen/Core>
+#include <se3.hpp>
 
 #include "OtherUtil.hpp"
 #include "Kinect.h"

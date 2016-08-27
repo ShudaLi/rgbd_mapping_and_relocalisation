@@ -25,6 +25,7 @@
 #include "DllExportDef.h"
 
 using namespace openni;
+using namespace Sophus;
 
 namespace btl{
 namespace kinect{
@@ -39,7 +40,10 @@ public:
 	typedef boost::shared_ptr<CVideoSourceKinect> tp_shared_ptr;
 	enum tp_mode { SIMPLE_CAPTURING = 1, RECORDING = 2, PLAYING_BACK = 3};
 	enum tp_status { CONTINUE=01, PAUSE=02, MASK1 =07, START_RECORDING=010, STOP_RECORDING=020, CONTINUE_RECORDING=030, DUMP_RECORDING=040, MASK_RECORDER = 070 };
-	enum tp_raw_data_processing_methods {BIFILTER_IN_ORIGINAL = 0,BIFILTER_IN_DISPARITY};
+	enum tp_raw_data_processing_methods {
+		BIFILTER_IN_ORIGINAL = 0, BIFILTER_IN_DISPARITY, BIFILTER_DYNAMIC
+	};
+
 	//constructor
     CVideoSourceKinect(ushort uResolution_, ushort uPyrHeight_, bool bUseNIRegistration_,const Eigen::Vector3f& eivCw_,const string& cam_param_path_ );
     virtual ~CVideoSourceKinect();
@@ -58,12 +62,21 @@ public:
 protected:
 	virtual void importYML();
 	// convert the depth map/ir camera to be aligned with the rgb camera
-	virtual void gpuBuildPyramidUseNICVm();
 
 	virtual void init();
 	void gpuBuildPyramidUseNICVmBiFilteringInOriginalDepth( );
+	void gpu_build_pyramid_dynamic_bilatera();
+	virtual void gpuBuildPyramidUseNICVm();
+	bool loadCoefficient(int nResolution_, int size_, Mat* coeff_, Mat* mask_);
+	bool loadLocation(vector<float>* pvLocations_);
 
 public:
+	//depth calibration parameters
+	GpuMat _calibXYxZ[2];
+	GpuMat _mask[2];
+	vector<float> _vRegularLocations;
+	string _serial_number;
+	bool _bMapUndistortionOn;
 	//parameters
 	float _fThresholdDepthInMeter; //threshold for filtering depth
 	float _fSigmaSpace; //degree of blur for the bilateral filter
@@ -74,6 +87,7 @@ public:
 	float _fScaleDepth;// __aKinectW[] / ( # of columns of input video )
 	float _fMtr2Depth; // 100
 	int _nRawDataProcessingMethod;
+	bool _bFast;
 
 	//cameras
 	btl_img::SCamera::tp_scoped_ptr _pRGBCamera;
@@ -106,6 +120,7 @@ protected:
 	cv::cuda::GpuMat _gpu_depth;
 	cv::Mat          _undist_depth;
 	cv::cuda::GpuMat _gpu_undist_depth;
+	cv::cuda::GpuMat _gpu_depth_float;
 	// duplicated camera parameters for speed up the VideoSourceKinect::align() in . because Eigen and cv matrix class is very slow.
 	// initialized in constructor after load of the _cCalibKinect.
 	float _aR[9];	// Relative rotation transpose

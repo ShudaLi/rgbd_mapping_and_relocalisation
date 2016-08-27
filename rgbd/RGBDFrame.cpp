@@ -54,6 +54,7 @@
 #include <opencv2/cudafeatures2d.hpp>
 #include <opencv2/cudaarithm.hpp>
 #include <opencv2/cudaimgproc.hpp>
+#include <se3.hpp>
 
 #include "OtherUtil.hpp"
 #include "Converters.hpp"
