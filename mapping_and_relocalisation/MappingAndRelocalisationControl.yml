@@ -10,7 +10,7 @@ CamParamPathFileName: "..\\data\\Xtion"
 Ransac_iterations_tracking: 100
 Ransac_iterations_relocalisation: 300
 KNN_tracking: 1
-KNN_relocalisation: 5
+KNN_relocalisation: 4
 
 uResolution: 1
 uPyrHeight: 3
