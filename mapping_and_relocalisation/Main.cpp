@@ -1,5 +1,6 @@
 
 //display kinect depth in real-time
+#define _USE_MATH_DEFINES
 #define INFO
 #define TIMER
 #include <GL/glew.h>
@@ -33,6 +34,7 @@
 #include <OpenNI.h>
 
 #include "Kinect.h"
+#include <se3.hpp>
 #include "EigenUtil.hpp"
 #include "GLUtil.hpp"
 #include <map>

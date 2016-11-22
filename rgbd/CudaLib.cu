@@ -29,7 +29,9 @@
 
 
 #include <opencv2/cudaarithm.hpp>
+#include <opencv2/cudawarping.hpp>
 #include <opencv2/core/cuda/common.hpp>
+
 #include "OtherUtil.hpp"
 #include <math_constants.h>
 #include "pcl/limits.hpp"
@@ -51,8 +53,9 @@ __global__ void kernelInverse(const cv::cuda::PtrStepSz<float> cvgmIn_, cv::cuda
     const int nX = blockDim.x * blockIdx.x + threadIdx.x;
     const int nY = blockDim.y * blockIdx.y + threadIdx.y;
 	if (nX >= cvgmIn_.cols || nY >= cvgmIn_.rows) return;
-	if(fabsf(cvgmIn_.ptr(nY)[nX]) > 0.01f )
-		cvgmOut_.ptr(nY)[nX] = 1.f/cvgmIn_.ptr(nY)[nX];
+	float D = cvgmIn_.ptr(nY)[nX];
+	if(D > 0.01f )
+		cvgmOut_.ptr(nY)[nX] = 1.f/D;
 	else
 		cvgmOut_.ptr(nY)[nX] = 0;//pcl::device::numeric_limits<float>::quiet_NaN();
 }//kernelInverse
@@ -76,10 +79,9 @@ __global__ void kernelInverse2(const cv::cuda::PtrStepSz<float> cvgmIn_, float f
 	//if (nX <2)
 		//printf("nX %d, nY %d, out %f\n", nX, nY);
 	if (nX >= cvgmIn_.cols || nY >= cvgmIn_.rows) return;
-
-	if (fabsf(cvgmIn_.ptr(nY)[nX]) > 0.01f && cvgmIn_.ptr(nY)[nX] < fCutOffDistance_){
-		float tmp = factor_ / cvgmIn_.ptr(nY)[nX];
-		cvgmOut_.ptr(nY)[nX] = tmp;
+	float D = cvgmIn_.ptr(nY)[nX];
+	if (D > 0.01f && D < fCutOffDistance_){
+		cvgmOut_.ptr(nY)[nX] = factor_ / D;
 	}
 	else{
 		cvgmOut_.ptr(nY)[nX] = 0; //pcl::device::numeric_limits<float>::quiet_NaN();
@@ -129,7 +131,7 @@ __global__ void kernelBilateral (const cv::cuda::PtrStepSz<float> src, cv::cuda:
 
     if (x >= src.cols || y >= src.rows)  return;
 
-    const int R = 2;//static_cast<int>(sigma_space * 1.5);
+    const int R = 5;//static_cast<int>(sigma_space * 1.5);
     const int D = R * 2 + 1;
 
     float fValueCentre = src.ptr (y)[x];
@@ -147,9 +149,9 @@ __global__ void kernelBilateral (const cv::cuda::PtrStepSz<float> src, cv::cuda:
         float  fValueNeighbour = src.ptr (cy)[cx];
 		//if fValueNeighbour is NaN
 		//if(fabs( fValueNeighbour - fValueCentre ) > 0.00005f) continue; 
-        float space2 = (x - cx) * (x - cx) + (y - cy) * (y - cy);
-        float color2 = (fValueCentre - fValueNeighbour) * (fValueCentre - fValueNeighbour);
-        float weight = __expf (-(space2 * _aSigma2InvHalf[0] + color2 * _aSigma2InvHalf[1]) );
+        float space2 = (x - cx) * (x - cx) * _aSigma2InvHalf[0];
+        float color2 = (fValueCentre - fValueNeighbour) * _aSigma2InvHalf[1];
+        float weight = __expf( -(space2 * space2 + color2 * color2) );
 
         sum1 += fValueNeighbour * weight;
         sum2 += weight;
@@ -159,14 +161,53 @@ __global__ void kernelBilateral (const cv::cuda::PtrStepSz<float> src, cv::cuda:
 	return;
 }//kernelBilateral
 
+__global__ void kernel_bilateral(const cv::cuda::PtrStepSz<float> src, cv::cuda::PtrStepSz<float> dst)
+{
+	int x = threadIdx.x + blockIdx.x * blockDim.x;
+	int y = threadIdx.y + blockIdx.y * blockDim.y;
+
+	if (x >= src.cols || y >= src.rows)  return;
+
+	const int R = 5;//static_cast<int>(sigma_space * 1.5);
+	const int D = R * 2 + 1;
+
+	float fValueCentre = src.ptr(y)[x];
+	float std = fValueCentre*0.05;
+	//std = std > 0. ? std : 0.01;
+	//if fValueCentre is NaN
+	if (fabs(fValueCentre) < 0.00001f) return;
+
+	int tx = min(x - D / 2 + D, src.cols - 1);
+	int ty = min(y - D / 2 + D, src.rows - 1);
+
+	float sum1 = 0;
+	float sum2 = 0;
+
+	for (int cy = max(y - D / 2, 0); cy < ty; ++cy)
+		for (int cx = max(x - D / 2, 0); cx < tx; ++cx) {
+			float  fValueNeighbour = src.ptr(cy)[cx];
+			//if fValueNeighbour is NaN
+			//if(fabs( fValueNeighbour - fValueCentre ) > 0.00005f) continue; 
+			float space2 = (x - cx) * (x - cx) * _aSigma2InvHalf[0];
+			float color2 = (fValueCentre - fValueNeighbour)/std ;
+			float weight = __expf( -( space2*space2  + color2*color2 ) );
+
+			sum1 += fValueNeighbour * weight;
+			sum2 += weight;
+		}//for for each pixel in neigbbourhood
+
+	dst.ptr(y)[x] = sum1 / sum2;
+	return;
+}//kernelBilateral
+
 void cuda_bilateral_filtering(const cv::cuda::GpuMat& cvgmSrc_, const float& fSigmaSpace_, const float& fSigmaColor_, cv::cuda::GpuMat* pcvgmDst_ )
 {
 	pcvgmDst_->setTo(0);// (std::numeric_limits<float>::quiet_NaN());
 	//constant definition
 	size_t sN = sizeof(float) * 2;
 	float* const pSigma = (float*) malloc( sN );
-	pSigma[0] = 0.5f / (fSigmaSpace_ * fSigmaSpace_);
-	pSigma[1] = 0.5f / (fSigmaColor_ * fSigmaColor_);
+	pSigma[0] = 1.f/fSigmaSpace_;
+	pSigma[1] = 1.f/fSigmaColor_;
 	cudaSafeCall( cudaMemcpyToSymbol(_aSigma2InvHalf, pSigma, sN) );
 	//define grid and block
 	dim3 block(32, 8);
@@ -176,6 +217,27 @@ void cuda_bilateral_filtering(const cv::cuda::GpuMat& cvgmSrc_, const float& fSi
 	//cudaSafeCall( cudaGetLastError () );
 	//cudaSafeCall( cudaDeviceSynchronize() );
 
+	//release temporary pointers
+	free(pSigma);
+	return;
+}
+
+void cuda_bilateral_filtering(const cv::cuda::GpuMat& cvgmSrc_, const float& fSigmaSpace_, cv::cuda::GpuMat* pcvgmDst_)
+{
+	GpuMat tmp(cvgmSrc_.size(), cvgmSrc_.type());
+	tmp.setTo(0);
+	size_t sN = sizeof(float) * 2;
+	float* const pSigma = (float*)malloc(sN);
+	pSigma[0] = 1.f / fSigmaSpace_;
+	cudaSafeCall(cudaMemcpyToSymbol(_aSigma2InvHalf, pSigma, sN));
+	//define grid and block
+	dim3 block(32, 8);
+	dim3 grid(cv::cuda::device::divUp(cvgmSrc_.cols, block.x), cv::cuda::device::divUp(cvgmSrc_.rows, block.y));
+	//run kernel
+	kernel_bilateral << <grid, block >> >(cvgmSrc_, tmp);
+	//cudaSafeCall( cudaGetLastError () );
+	//cudaSafeCall( cudaDeviceSynchronize() );
+	tmp.copyTo(*pcvgmDst_);
 	//release temporary pointers
 	free(pSigma);
 	return;
@@ -723,6 +785,8 @@ void cuda_estimate_normals(const GpuMat& vmap, GpuMat* nmap, GpuMat* reliability
 	int cols = vmap.cols;
 	int rows = vmap.rows;
 
+	nmap->setTo(cv::Scalar::all(std::numeric_limits<float>::quiet_NaN()));
+
 	dim3 block(32, 8);
 	dim3 grid(1, 1, 1);
 	grid.x = cv::cuda::device::divUp(cols, block.x);
@@ -735,6 +799,148 @@ void cuda_estimate_normals(const GpuMat& vmap, GpuMat* nmap, GpuMat* reliability
 
 	cudaSafeCall(cudaGetLastError());
 	cudaSafeCall(cudaDeviceSynchronize());
+	return;
+}
+
+
+__global__ void kernel_depth_2_gray(PtrStepSz<float> gpu_depth_, float max_, PtrStepSz<uchar3> gray_) {
+	//traverse each element of the matrix
+	const int nX = blockDim.x * blockIdx.x + threadIdx.x;
+	const int nY = blockDim.y * blockIdx.y + threadIdx.y;
+	if (nX >= gpu_depth_.cols || nY >= gpu_depth_.rows) return;
+	float de = gpu_depth_.ptr(nY)[nX];
+	if (de > 0.4f) {
+		uchar intensity = 255.f * (max_ - de) / max_;
+		gray_.ptr(nY)[nX] = make_uchar3(intensity,intensity, intensity);
+	}
+	else {
+		gray_.ptr(nY)[nX] = make_uchar3(0, 0, 0);
+	}
+	return;
+}
+
+void cuda_convert_depth_2_gray(const GpuMat& depth_, float max_, GpuMat* p_gray_)
+{
+	if (p_gray_->empty())
+		p_gray_->create(depth_.size(), CV_8UC3);
+	
+	dim3 block(16, 16);
+	dim3 grid(1, 1, 1);
+	grid.x = cv::cuda::device::divUp(depth_.cols, block.x);
+	grid.y = cv::cuda::device::divUp(depth_.rows, block.y);
+
+	kernel_depth_2_gray << <grid, block >> >(depth_, max_, *p_gray_);
+
+	cudaSafeCall(cudaGetLastError());
+	cudaSafeCall(cudaDeviceSynchronize());
+	return;
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+__global__ void kernel_undist(cv::cuda::PtrStepSz<float> depth_, const PtrStepSz<float> coefficient_, const PtrStepSz<uchar> mask_, float base_, float step_) {
+	const int nX = blockDim.x * blockIdx.x + threadIdx.x;
+	const int nY = blockDim.y * blockIdx.y + threadIdx.y;
+
+	//if (nX < 310 || nX >= 330 || nY < 230 || nY >= 250) return;
+	if (nX < 0 || nX >= depth_.cols || nY < 0 || nY >= depth_.rows) return;
+	float dep = depth_.ptr(nY)[nX];
+	if (dep < 0.3f || mask_.ptr(nY)[nX] == 0) {
+		depth_.ptr(nY)[nX] = 0.f;
+		return;
+	}
+	else if (dep < base_) {
+		return;
+	}
+	float ratio = (dep - base_) / step_;
+	int bin = __float2int_rd(ratio);
+	//printf("dep = %f; ratio = %f ; bin = %d \n", dep, ratio, bin); 
+	if (bin >= 0 && bin < coefficient_.cols) {
+		ratio -= bin;
+		const float* pos = coefficient_.ptr(nY * depth_.cols + nX);
+		float c1 = *(pos + bin);
+		float c2 = *(pos + bin + 1);
+		//printf("c1 = %f; c2 = %f; ratio = %f;\n", c1, c2, ratio);
+		depth_.ptr(nY)[nX] -= (c1 * (1. - ratio) + c2*ratio);
+	}
+	else {
+		depth_.ptr(nY)[nX] = 0.f;
+	}
+
+	return;
+}//kernel_undist
+
+
+void undistortion_depth(const GpuMat& coefficient_, const GpuMat& mask_, float base_, float step_, GpuMat* depth_)
+{
+	//define grid and block
+	dim3 block(32, 16);
+	dim3 grid(cv::cuda::device::divUp(mask_.cols, block.x), cv::cuda::device::divUp(mask_.rows, block.y));
+	//run kernel
+	kernel_undist << <grid, block >> >(*depth_, coefficient_, mask_, base_, step_);
+	cudaSafeCall(cudaGetLastError());
+	cudaSafeCall(cudaDeviceSynchronize());
+	return;
+}//cudaDepth2Disparity
+
+ //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+__global__ void kernel_extract_error(const PtrStepSz<float> Error_field_, int Idx, PtrStepSz<float> Error) {
+	const int nX = blockDim.x * blockIdx.x + threadIdx.x;
+	const int nY = blockDim.y * blockIdx.y + threadIdx.y;
+	if (nX < 0 || nX >= Error.cols || nY < 0 || nY >= Error.rows) return;
+	const float* pos = Error_field_.ptr(nY * Error.cols + nX);
+	Error.ptr(nY)[nX] = *(pos + Idx);
+	return;
+}
+
+void cuda_extract_error(const GpuMat& Error_field_, int Idx, GpuMat* pError_)
+{
+	dim3 block(32, 32);
+	dim3 grid(cv::cuda::device::divUp(pError_->cols, block.x), cv::cuda::device::divUp(pError_->rows, block.y));
+	//run kernel
+	kernel_extract_error << < grid, block >> >(Error_field_, Idx, *pError_);
+	cudaSafeCall(cudaGetLastError());
+	//cudaSafeCall(cudaDeviceSynchronize());
+	return;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+__global__ void kernel_fill_error(const PtrStepSz<float> Error, int Idx, PtrStepSz<float> Error_field_) {
+	const int nX = blockDim.x * blockIdx.x + threadIdx.x;
+	const int nY = blockDim.y * blockIdx.y + threadIdx.y;
+	if (nX < 0 || nX >= Error.cols || nY < 0 || nY >= Error.rows) return;
+	float* pos = Error_field_.ptr(nY * Error.cols + nX);
+	*(pos + Idx) = Error.ptr(nY)[nX];
+	return;
+}//kernel_fill_error
+
+void cuda_fill_error(const GpuMat& Error, int Idx, GpuMat* pError_field_)
+{
+	assert(Idx < pError_field_->cols);
+	assert(pError_field_->rows == Error.rows *Error.cols);
+
+	dim3 block(32, 32);
+	dim3 grid(cv::cuda::device::divUp(Error.cols, block.x), cv::cuda::device::divUp(Error.rows, block.y));
+	//run kernel
+	kernel_fill_error << <grid, block >> >(Error, Idx, *pError_field_);
+	cudaSafeCall(cudaGetLastError());
+	//cudaSafeCall(cudaDeviceSynchronize());
+	return;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void cuda_resize_coeff(const GpuMat& coeff0, GpuMat* pCoeff1) {
+	if (pCoeff1->empty()) {
+		pCoeff1->create(coeff0.rows / 4, coeff0.cols, CV_32FC1);
+	}
+	GpuMat tmp; tmp.create(480, 640, CV_32FC1);
+	for (int i = 0; i < coeff0.cols; i++)
+	{
+		cuda_extract_error(coeff0, i, &tmp);
+		GpuMat tmp_half;
+		cuda::resize(tmp, tmp_half, Size(320, 240));
+		cuda_fill_error(tmp_half, i, &*pCoeff1);
+	}
 	return;
 }
 

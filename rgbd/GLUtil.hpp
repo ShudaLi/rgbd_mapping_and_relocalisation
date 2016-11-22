@@ -22,6 +22,7 @@
 
 #ifndef BTL_GL_UTIL
 #define BTL_GL_UTIL
+#define _USE_MATH_DEFINES
 #include "DllExportDef.h"
 
 

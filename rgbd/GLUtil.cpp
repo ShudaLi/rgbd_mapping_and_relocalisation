@@ -19,6 +19,7 @@
 //SOFTWARE.
 
 
+#define _USE_MATH_DEFINES
 #define EXPORT
 #define INFO
 #include <GL/glew.h>
@@ -37,6 +38,7 @@
 #include <vector>
 #include <Eigen/Dense>
 #include <Eigen/Core>
+#include <se3.hpp>
 
 #include "OtherUtil.hpp"
 #include "Kinect.h"

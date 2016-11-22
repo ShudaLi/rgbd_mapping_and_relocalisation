@@ -1,4 +1,5 @@
 using namespace std;
+using namespace Sophus;
 
 
 class CMultiViewer : public QGLViewer

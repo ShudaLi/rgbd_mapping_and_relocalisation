@@ -18,7 +18,6 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-
 #ifndef BTL_CUDA_HEADER
 #define BTL_CUDA_HEADER
 #include "DllExportDef.h"
@@ -30,6 +29,8 @@ void DLL_EXPORT cudaTestFloat3( const GpuMat& cvgmIn_, GpuMat* pcvgmOut_ );
 void DLL_EXPORT cuda_depth2disparity2( const GpuMat& cvgmDepth_, float fCutOffDistance_, GpuMat* pcvgmDisparity_, float factor_ = 1000.f );
 void DLL_EXPORT cuda_disparity2depth( const GpuMat& cvgmDisparity_, GpuMat* pcvgmDepth_ );
 void DLL_EXPORT cuda_bilateral_filtering(const GpuMat& cvgmSrc_, const float& fSigmaSpace_, const float& fSigmaColor_, GpuMat* pcvgmDst_ );
+void DLL_EXPORT cuda_bilateral_filtering(const cv::cuda::GpuMat& cvgmSrc_, const float& fSigmaSpace_, cv::cuda::GpuMat* pcvgmDst_);
+
 void DLL_EXPORT cuda_pyr_down (const GpuMat& cvgmSrc_, const float& fSigmaColor_, GpuMat* pcvgmDst_);
 void DLL_EXPORT cuda_unproject_rgb ( const GpuMat& cvgmDepths_, 
 										const float& fFxRGB_, const float& fFyRGB_, const float& uRGB_, const float& vRGB_, unsigned int uLevel_,
@@ -43,6 +44,11 @@ void DLL_EXPORT cuda_transform_local2world(const float* pRw_/*col major*/, const
 void DLL_EXPORT cuda_resize_map (bool bNormalize_, const GpuMat& cvgmSrc_, GpuMat* pcvgmDst_);
 void DLL_EXPORT cuda_init_idx(int nCols_, int type_, GpuMat* p_idx_);
 void DLL_EXPORT cuda_sort_column_idx(GpuMat* const& p_key_, GpuMat*const & p_idx_);
+void DLL_EXPORT cuda_convert_depth_2_gray(const GpuMat& depth_, float max_, GpuMat* p_gray_);
+//depth undistortion
+void DLL_EXPORT undistortion_depth(const GpuMat& coefficient_, const GpuMat& mask_, float base_, float step_, GpuMat* depth_);
+void DLL_EXPORT cuda_resize_coeff(const GpuMat& coeff0, GpuMat* pCoeff1);
+
 }//device
 }//btl
 #endif

@@ -75,6 +75,7 @@
 #include "Converters.hpp"
 #include "GLUtil.hpp"
 #include "CVUtil.hpp"
+#include <se3.hpp>
 #include "EigenUtil.hpp"
 #include "pcl/internal.h"
 #include <map>

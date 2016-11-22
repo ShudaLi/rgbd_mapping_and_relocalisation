@@ -5,6 +5,7 @@
 * @version 1.0
 * @date 2015-07-15
 */
+#define _USE_MATH_DEFINES
 #define INFO
 #define TIMER
 #include <GL/glew.h>
@@ -41,6 +42,7 @@
 #include <OpenNI.h>
 #include "Kinect.h"
 #include "EigenUtil.hpp"
+#include <se3.hpp>
 #include "GLUtil.hpp"
 #include <map>
 #include "Camera.h"
@@ -49,6 +51,7 @@
 #include "pcl/internal.h"
 #include "CubicGrids.h"
 #include "KinfuTracker.h"
+
 
 //Qt
 #include <QResizeEvent>
@@ -59,6 +62,7 @@
 #include <QCoreApplication>
 using namespace qglviewer;
 using namespace std;
+using namespace Sophus;
 CMultiViewer::CMultiViewer(string strName_, CDataLive::tp_shared_ptr pData, QWidget* parent, const QGLWidget* shareWidget)
 :QGLViewer(parent, shareWidget)
 {
@@ -95,8 +99,13 @@ void CMultiViewer::draw()
 			float aColor[4] = {0.f,0.f,1.f,1.f};	glColor4fv(aColor);
 			renderText(5, 40, QString("global view"), QFont("Arial", 13, QFont::Bold));
 	
+			if (_pData->_pKinect->_bMapUndistortionOn) {
+				glColor3f(1.f, 0.f, 0.f);
+				renderText(330, 40, QString("Undistortion ON"), QFont("Arial", 13, QFont::Bold));
+			}
+
 			if( _pData->isCapturing() )	{
-				if (!_pData->isTrackOnly()){
+				if (!_pData->_bTrackOnly){
 					float aColor[4] = {1.f,0.f,0.f,1.f}; glColor4fv(aColor);
 					renderText(230,20, QString("mapping"), QFont("Arial", 13, QFont::Normal));
 				}
@@ -120,7 +129,7 @@ void CMultiViewer::draw()
 	else if(!_strViewer.compare("depth_view"))	{
 		_pData->drawDepthView(camera());
 		float aColor[4] = { 0.f, 0.f, 1.f, 1.f };	glColor4fv(aColor);
-		renderText(5, 40, QString("raw depth"), QFont("Arial", 13, QFont::Bold));
+		//renderText(5, 40, QString("raw depth"), QFont("Arial", 13, QFont::Bold));
 	}
 	return;
 }
@@ -260,7 +269,9 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 		updateGL(); // Refresh display
 	}
 	else if (pEvent_->key() == Qt::Key_9) {
-		_pData->switchPyramid();
+		//_pData->switchPyramid();
+		_pData->_nNormalMap++;
+		_pData->_nNormalMap %= 3;
 		updateGL(); // Refresh display
 	}
 	else if (pEvent_->key() == Qt::Key_L && !(pEvent_->modifiers() & Qt::ShiftModifier)) {
@@ -292,11 +303,14 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 		updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_F8){
+		_pData->_pKinect->_bFast = !_pData->_pKinect->_bFast;
 		_pData->switchVoxelLevel();
 		updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_F9){
-		_pData->switchSphere();
+		//_pData->switchSphere();
+		_pData->_pKinect->_nRawDataProcessingMethod++;
+		_pData->_pKinect->_nRawDataProcessingMethod%=3;
 		updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_R && !(pEvent_->modifiers() & Qt::ShiftModifier)){
@@ -329,7 +343,7 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 		updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_T && !(pEvent_->modifiers() & Qt::ShiftModifier)){
-		_pData->switchTrackOnly();
+		_pData->_pTracker->_bTrackingOnly = !_pData->_pTracker->_bTrackingOnly;
 		updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_P && !(pEvent_->modifiers() & Qt::ShiftModifier)){
@@ -361,10 +375,6 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 			setFullScreen(false);
 			resize(1280, 480);
 		}
-	}
-	else if (pEvent_->key() == Qt::Key_M && (pEvent_->modifiers() & Qt::ShiftModifier)){
-		_pData->_pCubicGrids->gpuMarchingCubes();
-		updateGL();
 	}
 	QGLViewer::keyPressEvent(pEvent_);
 }

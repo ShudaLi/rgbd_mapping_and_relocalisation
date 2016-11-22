@@ -6,6 +6,7 @@ using namespace btl::kinect;
 using namespace btl::geometry;
 using namespace std;
 using namespace Eigen;
+using namespace Sophus;
 
 void convert(const Eigen::Affine3f& eiM_, Mat* pM_);
 void convert(const Eigen::Matrix4f& eiM_, Mat* pM_);
@@ -17,6 +18,7 @@ class CData4Viewer
 {
 public:
 	typedef boost::shared_ptr<CData4Viewer> tp_shared_ptr;
+	enum tp_map { NORMAL_MAP = 0, SHADED_SURFACE, DEPTH_MAP };
 
 	CData4Viewer();
 	virtual ~CData4Viewer();
@@ -121,6 +123,9 @@ public:
 	bool _bRenderSphere;
 	bool _bLoadVolume;
 	bool _bStorePoses;
+
+	uchar _nNormalMap;
+	double _mi, _ma;
 
 	cv::String _global_model_folder;
 	std::vector<cv::String> _vstrPoseEstimationMethod;

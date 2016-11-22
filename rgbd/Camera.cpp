@@ -19,6 +19,7 @@
 //SOFTWARE.
 
 
+#define _USE_MATH_DEFINES
 #define EXPORT
 #define INFO
 //gl
@@ -35,6 +36,7 @@
 #include <boost/scoped_ptr.hpp>
 #include <opencv2/cudaarithm.hpp>
 #include <Eigen/Dense>
+#include <se3.hpp>
 
 #include "OtherUtil.hpp"
 #include "GLUtil.hpp"
