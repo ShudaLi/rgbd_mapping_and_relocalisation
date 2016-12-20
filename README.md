@@ -28,6 +28,8 @@ me, if you have any question or suggestions.
 	 
 'F5', switch on/off the recorded camera path (red/blue curves)
 
+'M', convert the TSDF surface representation into a triangle mesh, to display it, press '7'  
+
 More key settings can be found in Viewer::keyPressEvent() in the ./live_mapping_and_relocalisation/MultiViewer.cpp 
 
 -------------------------------------------------------------------------------
@@ -44,6 +46,7 @@ in the source codes.
 
 - OpenCV 3.0 (BSD license)
 - Eigen (GNU free software)
+- Sopuhs (GNU free software)
 - OpenNI 2 (Apache license)
 - Boost (BSD License)
 - GLEW (Free commercial use)
