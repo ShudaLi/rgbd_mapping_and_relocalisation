@@ -308,6 +308,7 @@ void CData4Viewer::drawGlobalView()
 		_pVirtualGlobalView->gpuRender3DPts(_pGL.get(), 0);
 	}
 	else{
+		_pCubicGrids->displayTriangles();
 		//_pVirtualGlobalView->assignRTfromGL();
 		//_pCubicGridsMoved->gpuRaycast(&*_pVirtualGlobalView, true, _bCapture); //if capturing is on, fineCast is off
 		//_pVirtualGlobalView->gpuRender3DPts(_pGL.get(), 0);

@@ -364,6 +364,15 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 		_pData->switchContinuous();
 		updateGL();
 	}
+	else if (pEvent_->key() == Qt::Key_M && (pEvent_->modifiers() & Qt::ShiftModifier)) {
+		/*if ((_nStatus&VideoSourceKinect::MASK1) == VideoSourceKinect::PAUSE){
+		_nStatus = (_nStatus&(~VideoSourceKinect::MASK1))|VideoSourceKinect::CONTINUE;
+		}else if ((_nStatus&VideoSourceKinect::MASK1) == VideoSourceKinect::CONTINUE){
+		_nStatus = (_nStatus&(~VideoSourceKinect::MASK1))|VideoSourceKinect::PAUSE;
+		}*/
+		_pData->_pCubicGrids->gpuMarchingCubes();
+		updateGL();
+	}
 	else if (pEvent_->key() == Qt::Key_Escape && !(pEvent_->modifiers() & Qt::ShiftModifier)){
 		QCoreApplication::instance()->quit();
 	}
