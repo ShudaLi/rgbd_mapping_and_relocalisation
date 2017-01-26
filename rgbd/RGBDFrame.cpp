@@ -167,6 +167,7 @@ void btl::kinect::CRGBDFrame::allocate(){
 		_acvgmShrPtrPyr32FC1Tmp[i].reset();
 		_acvgmShrPtrPyr32FC1Tmp[i].reset(new cv::cuda::GpuMat(nRowsDepth,nColsDepth,CV_32FC1));
 	}
+	_normal_map.create(__aRGBH[_uResolution],__aRGBW[_uResolution],CV_8UC3);
 
 	_eConvention = btl::utility::BTL_CV;
 

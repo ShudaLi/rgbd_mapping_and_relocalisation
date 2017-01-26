@@ -37,7 +37,7 @@ QT5_WRAP_CPP(HEADERS_MOC ${HEADERS})
 	link_directories ( $ENV{ZLIB_LIB} )
 	
 	
-if(MSVC)
+if(WIN32)
         set(RGBDLIB optimized Rgbd debug Rgbdd)
         set(QGLVIEWER  optimized QGLViewer2  debug QGLViewerd2 )
 		set(ZLIB optimized zlib debug zlibd )	
@@ -54,7 +54,7 @@ elseif(UNIX)
 	set(GLLIB ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY})
 	set(OPENNI2LIB ${OPENNI2_LIBRARY})
 	set(ZLIB ${ZLIB_LIBRARY})
-	set(QGLVIEWER  QGLViewer )
+	set(QGLVIEWER  QGLViewer-qt5 )
 	set(EXTRA_LIBS ${RGBDLIB} ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} OpenNI2
 		${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SERIALIZATION_LIBRARY} 
         ${FREEGLUTLIB} ${GLLIB} ${GLEWLIB} ${QGLVIEWER} ${QT_LIBRARIES} ${OpenCV_LIBS})
