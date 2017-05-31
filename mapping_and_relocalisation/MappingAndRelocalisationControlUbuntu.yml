@@ -11,8 +11,8 @@ Ransac_iterations_relocalisation: 100
 KNN_tracking: 1
 KNN_relocalisation: 5
 
-uResolution: 0
-uPyrHeight: 3
+uResolution: 1
+uPyrHeight: 4
 bUseNIRegistration: 1
 uCubicGridResolution: [ 512, 512, 512 ]
 #the resolution of the TSDF
@@ -21,7 +21,7 @@ Feature_scales: 1
 InitialCamPos: [ 1.5, .75, 1.5 ]
 bDisplayImage: 0
 bLightOn: 1
-nMode: 2 
+nMode: 1
 #1 Live 2 recorder 3 player
 oniFile: "..//live_kinect//ls.oni"
 #store the openni RGBD stream into a "oni" file.

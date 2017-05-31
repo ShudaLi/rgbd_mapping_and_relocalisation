@@ -48,6 +48,7 @@
 namespace btl{	namespace gl_util
 {
 	using namespace Eigen;
+	using namespace std;
 	
 	CGLUtil::CGLUtil(ushort uResolution_, ushort uPyrLevel_,btl::utility::tp_coordinate_convention eConvention_ /*= btl::utility::BTL_GL*/,const Eigen::Vector3f& eivCentroid_ /*= Eigen::Vector3f(1.5f,1.5f,0.3f)*/)
 		:_uResolution(uResolution_),_usPyrHeight(uPyrLevel_),_usLevel(0),_eConvention(eConvention_),_eivCentroid(eivCentroid_){
@@ -258,6 +259,7 @@ namespace btl{	namespace gl_util
 		case 20:
 			return 5;
 		default:
+			cout << nCols_ << endl;
 			PRINTSTR("Failure - input resolution is not 640x480 or 320x240 or 160x120 or 80x60 or 40x30. ");
 			return -1;
 		}

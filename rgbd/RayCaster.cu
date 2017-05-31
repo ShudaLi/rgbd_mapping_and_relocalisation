@@ -72,7 +72,7 @@ getMinTime(const float3& dir)
 	float tymin = ((dir.y > 0 ? 0.f : __param.__volume_max_size_m_1_cell.y) - __param.__tcurr.y) / dir.y;
 	float tzmin = ((dir.z > 0 ? 0.f : __param.__volume_max_size_m_1_cell.z) - __param.__tcurr.z) / dir.z;
 
-	return fmax(fmax(txmin, tymin), tzmin);
+	return fmaxf(fmaxf(txmin, tymin), tzmin);
 }
 
 __device__ __forceinline__ float
@@ -82,7 +82,7 @@ getMaxTime(const float3& dir)
 	float tymax = ((dir.y > 0 ? __param.__volume_max_size_m_1_cell.y : 0.f) - __param.__tcurr.y) / dir.y;
 	float tzmax = ((dir.z > 0 ? __param.__volume_max_size_m_1_cell.z : 0.f) - __param.__tcurr.z) / dir.z;
 
-	return fmin(fmin(txmax, tymax), tzmax);
+	return fminf(fminf(txmax, tymax), tzmax);
 }
 
 
@@ -237,12 +237,12 @@ struct RayCaster
 			g = getVoxel(__param.__tcurr + ray_dir * (time_start_volume + __param.__time_step));	if (!(g.x >= 0 && g.y >= 0 && g.z >= 0 && g.x < __param.__VOLUME.x && g.y < __param.__VOLUME.y && g.z < __param.__VOLUME.z))  break; //get next g
 			n.x/*tsdf*/ = unpack_tsdf(_cvgmVolume.ptr(__param.__VOLUME.x * g.y + g.x)[g.z]); //read tsdf at g
 
-			if (isnan(n.y/*tsdf_prev*/) || isnan(n.x/*tsdf*/) || n.y/*tsdf_prev*/ == n.x/*tsdf*/ || n.y/*tsdf_prev*/ < 0.f && n.x/*tsdf*/ >= 0.f)  continue;
+			if (n.y!=n.y/*tsdf_prev*/ || n.x!=n.x/*tsdf*/ || n.y/*tsdf_prev*/ == n.x/*tsdf*/ || n.y/*tsdf_prev*/ < 0.f && n.x/*tsdf*/ >= 0.f)  continue;
 
 			if (n.y/*tsdf_prev*/ >= 0.f && n.x/*tsdf*/ < 0.f)           //zero crossing
 			{
-				n.x/*tsdf*/ = interpolateTrilinearyOrigin(ray_dir, time_start_volume + __param.__time_step); if (isnan(n.x/*tsdf*/)) continue; //get more accurate tsdf & tsdf_prev Ftdt
-				n.y/*tsdf_prev*/ = interpolateTrilinearyOrigin(ray_dir, time_start_volume);               if (isnan(n.y/*tsdf_prev*/)) continue; //Ft
+				n.x/*tsdf*/ = interpolateTrilinearyOrigin(ray_dir, time_start_volume + __param.__time_step); if (n.x!=n.x/*tsdf*/) continue; //get more accurate tsdf & tsdf_prev Ftdt
+				n.y/*tsdf_prev*/ = interpolateTrilinearyOrigin(ray_dir, time_start_volume);               if (n.y!=n.y/*tsdf_prev*/) continue; //Ft
 
 				//float Ts = time_start_volume - time_step * tsdf_prev / (tsdf - tsdf_prev);
 				float3 vertex_found = __param.__tcurr + ray_dir * (time_start_volume - __param.__time_step * n.y/*tsdf_prev*/ / (n.x/*tsdf*/ - n.y/*tsdf_prev*/));
@@ -379,7 +379,7 @@ struct RayCaster
 		if (x < __param.__cols && y < __param.__rows) { // we cant use x >= cols || y >= rows because __syncthreads
 			_mask.ptr(y)[x] = uchar(0);
 			float3 Vw = vmap.ptr(y)[x];
-			if (!isnan(Vw.x) && !isnan(Vw.y) && !isnan(Vw.z)){
+			if (Vw.x==Vw.x && Vw.y==Vw.y && Vw.z==Vw.z){
 				float dist = norm<float, float3>(Vw);
 				Vw = __param.__Rcurr*Vw + __param.__tcurr;//Rcurr = Rw'; tcurr = cw;  i.e. transform V from camera to world
 				//printf("[%d, %d]:\t [%f, %f, %f]\n ", x, y, Vw.x, Vw.y, Vw.z);
@@ -387,7 +387,7 @@ struct RayCaster
 				if (g.x > 1 && g.y > 1 && g.z > 1 && g.x < __param.__VOLUME_m_2.x && g.y < __param.__VOLUME_m_2.y && g.z < __param.__VOLUME_m_2.z )
 				{
 					float TSDF = interpolateTrilineary(Vw); //readTsdf(Vw.x, Vw.y, Vw.z);
-					if (!isnan(TSDF) && fabs(TSDF) < .49f){//
+					if (TSDF==TSDF && fabs(TSDF) < .49f){//
 						//printf("[%d, %d]:\t %f [%d, %d, %d] [%f, %f, %f]\n ", x, y, TSDF, g.x, g.y, g.z, Vw.x, Vw.y, Vw.z);
 						//printf("[%f, %f, %f; %f, %f, %f;%f, %f, %f;]\n", __param.__Rcurr.data[0].x, __param.__Rcurr.data[0].y, __param.__Rcurr.data[0].z, __param.__Rcurr.data[1].x, __param.__Rcurr.data[1].y, __param.__Rcurr.data[1].z, __param.__Rcurr.data[2].x, __param.__Rcurr.data[2].y, __param.__Rcurr.data[2].z);
 						_mask.ptr(y)[x] = uchar(255);
@@ -408,7 +408,7 @@ struct RayCaster
 		float fE = 0.f; // it has to be there for all threads, otherwise, some thread will add un-initialized fE into total energy. 
 		if (x < __param.__cols && y < __param.__rows) { // we cant use x >= cols || y >= rows because __syncthreads
 			float3 Vw = vmap.ptr(y)[x];
-			if (!isnan(Vw.x) && !isnan(Vw.y) && !isnan(Vw.z)){
+			if (Vw.x==Vw.x && Vw.y==Vw.y && Vw.z==Vw.z){
 				Vw = __param.__Rcurr*Vw + __param.__tcurr;//Rcurr = Rw'; tcurr = cw;  i.e. transform V from camera to world
 				if ( Vw.x < __param.__cell_size || Vw.y < __param.__cell_size || Vw.z < __param.__cell_size || Vw.x > __param.__volume_max_size_m_1_cell.x || Vw.y > __param.__volume_max_size_m_1_cell.y || Vw.z > __param.__volume_max_size_m_1_cell.z ){
 					_mask2.ptr(y)[x] = uchar(1);
@@ -445,7 +445,7 @@ struct RayCaster
 
 		if (x < __param.__cols && y < __param.__rows) {
 			float3 Vw = vmap.ptr(y)[x];
-			if (!isnan(Vw.x) && !isnan(Vw.y) && !isnan(Vw.z)){
+			if (Vw.x==Vw.x && Vw.y==Vw.y && Vw.z==Vw.z){
 				Vw = __param.__Rcurr*Vw + __param.__tcurr;//Rcurr = Rw'; tcurr = cw;  i.e. transform V from camera to world
 				//get integer volume grid coordinate g
 				row[3] = Vw.x * __param.__inv_cell_size;
