@@ -62,7 +62,7 @@
 #include <QCoreApplication>
 using namespace qglviewer;
 using namespace std;
-using namespace Sophus;
+
 CMultiViewer::CMultiViewer(string strName_, CDataLive::tp_shared_ptr pData, QWidget* parent, const QGLWidget* shareWidget)
 :QGLViewer(parent, shareWidget)
 {

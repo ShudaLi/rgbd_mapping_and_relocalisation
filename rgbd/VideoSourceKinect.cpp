@@ -73,7 +73,6 @@
 using namespace btl::utility;
 using namespace openni;
 using namespace std;
-using namespace Sophus;
 
 namespace btl{ namespace kinect
 {  

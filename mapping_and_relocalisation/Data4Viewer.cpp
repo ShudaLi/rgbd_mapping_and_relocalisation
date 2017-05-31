@@ -62,7 +62,6 @@ using namespace std;
 using namespace cv;
 using namespace Eigen;
 using namespace qglviewer;
-using namespace Sophus;
 
 void convert(const Eigen::Affine3f& eiM_, Mat* pM_){
 	pM_->create(4, 4, CV_32FC1);

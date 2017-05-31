@@ -25,7 +25,6 @@
 #include "DllExportDef.h"
 
 using namespace openni;
-using namespace Sophus;
 
 namespace btl{
 namespace kinect{

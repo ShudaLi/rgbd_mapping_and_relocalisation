@@ -6,7 +6,6 @@ using namespace btl::kinect;
 using namespace btl::geometry;
 using namespace std;
 using namespace Eigen;
-using namespace Sophus;
 
 void convert(const Eigen::Affine3f& eiM_, Mat* pM_);
 void convert(const Eigen::Matrix4f& eiM_, Mat* pM_);

@@ -59,8 +59,8 @@
 using namespace std;
 using namespace cv;
 using namespace Eigen;
-using namespace Sophus;
 using namespace qglviewer;
+
 CDataLive::CDataLive()
 :CData4Viewer(){
 	_bUseNIRegistration = true;

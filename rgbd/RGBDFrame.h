@@ -30,7 +30,6 @@ namespace btl { namespace kinect {
 using namespace Eigen;
 using namespace cv;
 using namespace cv::cuda;
-using namespace Sophus;
 
 class DLL_EXPORT CRGBDFrame {
 	//type
@@ -158,7 +157,7 @@ public:
 	Matrix3f _Rw; 
 	Vector3f _Tw; 
 	Vector3f _eivInitCw;
-	SE3Group<float> _T_cw;
+	Sophus::SE3<float> _T_cw;
 	//GL ModelView Matrix
 	//render context
 	//btl::gl_util::CGLUtil::tp_ptr _pGL;

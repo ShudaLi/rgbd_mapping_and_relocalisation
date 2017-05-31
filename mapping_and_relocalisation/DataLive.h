@@ -40,7 +40,6 @@ using namespace btl::kinect;
 using namespace btl::geometry;
 using namespace std;
 using namespace Eigen;
-using namespace Sophus;
 
 class CDataLive: public CData4Viewer
 {

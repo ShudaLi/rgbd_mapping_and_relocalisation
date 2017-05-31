@@ -73,7 +73,6 @@
 #include "pcl/internal.h"
 
 using namespace Eigen;
-using namespace Sophus;
 
 btl::kinect::CRGBDFrame::CRGBDFrame( btl::image::SCamera::tp_ptr pRGBCamera_, ushort uResolution_, ushort uPyrLevel_, const Vector3f& eivCw_/*float fCwX_, float fCwY_, float fCwZ_*/ )
 :_pRGBCamera(pRGBCamera_),_uResolution(uResolution_),_uPyrHeight(uPyrLevel_),_eivInitCw(eivCw_){
@@ -210,14 +209,14 @@ void btl::kinect::CRGBDFrame::initRT(){
 		      0.f, 1.f, 0.f,
 			  0.f, 0.f, 1.f;
 	_Tw = -_eivInitCw; 
-	_T_cw = SE3Group<float>(_Rw, _Tw);
+	_T_cw = Sophus::SE3<float>(_Rw, _Tw);
 }
 
 void btl::kinect::CRGBDFrame::copyRTFrom(const CRGBDFrame& cFrame_ ){
 	//assign rotation and translation 
 	_Rw = cFrame_._Rw;
 	_Tw = cFrame_._Tw;
-	_T_cw = SE3Group<float>(_Rw, _Tw);
+	_T_cw = Sophus::SE3<float>(_Rw, _Tw);
 }
 
 void btl::kinect::CRGBDFrame::assignRTfromGL(){
