@@ -23,7 +23,7 @@ if(UNIX)
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11")
 endif()
 
-set(CUDA_NVCC_FLAGS; -arch=sm_35 )#cmak
+set(CUDA_NVCC_FLAGS; -arch=sm_30 )#cmak
 
 find_package(Qt5OpenGL REQUIRED PATHS $ENV{QtOpenGL})
 find_package(Qt5Core REQUIRED  PATHS $ENV{QtCore})

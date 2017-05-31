@@ -15,10 +15,10 @@ KNN_relocalisation: 5
 uResolution: 1
 uPyrHeight: 4
 bUseNIRegistration: 1
-uCubicGridResolution: [ 800, 800, 800 ]
-fVolumeSize: 5
+uCubicGridResolution: [ 400, 400, 400 ]
+fVolumeSize: 3
 Feature_scales: 1
-InitialCamPos: [ 2.5, 2.5, 1.5 ]
+InitialCamPos: [ 1.5, 1.5, .5 ]
 bDisplayImage: 0
 bLightOn: 1
 nMode: 1

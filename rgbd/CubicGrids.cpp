@@ -817,7 +817,7 @@ double CCubicGrids::verifyPoseHypothesesAndRefine(CRGBDFrame::tp_ptr pCurFrame_,
 		Eigen::Vector4i eivIter;
 		pPrevFrame_->getRnt(&*pRw_, &*pTw_);//use previous R,t as initial pose
 		{
-			short asICPIterations[4] = { 8, 4, 3, 2 };
+			short asICPIterations[4] = { 3, 2, 1, 1};
 			dICPEnergy = icpFrm2Frm(pCurFrame_, pPrevFrame_, asICPIterations, &*pRw_, &*pTw_, &eivIter);
 		}
 		pCurFrame_->setRTw(*pRw_, *pTw_);
