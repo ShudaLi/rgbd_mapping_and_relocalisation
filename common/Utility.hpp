@@ -180,32 +180,6 @@ void normalEstimationGLPCL( const T* pDepth_, const cv::Mat& cvmRGB_, int nKNear
 
 
 template< class T >
-void normalVotes( const T* pNormal_, const double& dS_, int* pR_, int* pC_, btl::utility::tp_coordinate_convention eCon_ = btl::utility::BTL_GL)
-{
-	//pNormal[3] is a normal defined in a right-hand reference
-	//system with positive-z the elevation, and counter-clockwise from positive-x is
-	//the azimuth, 
-	//dS_ is the step length in radian
-	//*pR_ is the discretized elevation 
-	//*pC_ is the discretized azimuth
-
-	//normal follows GL-convention
-	const double dNx = pNormal_[0];
-	const double dNy = pNormal_[1];
-	double dNz = pNormal_[2];
-	if(btl::utility::BTL_CV == eCon_) {dNz = -dNz;}
-
-	double dA = atan2(dNy,dNx); //atan2 ranges from -pi to pi
-	dA = dA <0 ? dA+2*M_PI :dA; // this makes sure that dA ranging from 0 to 2pi
-	double dyx= sqrt( dNx*dNx + dNy*dNy );
-	double dE = atan2(dNz,dyx);
-
-	*pC_ = floor(dA/dS_);
-	*pR_ = floor(dE/dS_);
-
-}
-
-template< class T >
 void avgNormals(const cv::Mat& cvmNls_,const std::vector<unsigned int>& vNlIdx_, Eigen::Vector3d* peivAvgNl_)
 {
 	//note that not all normals in vNormals_ will be averaged

@@ -36,7 +36,7 @@ class DLL_EXPORT CVideoSourceKinect
 {
 public:
 	//type
-	typedef boost::shared_ptr<CVideoSourceKinect> tp_shared_ptr;
+	typedef std::shared_ptr<CVideoSourceKinect> tp_shared_ptr;
 	enum tp_mode { SIMPLE_CAPTURING = 1, RECORDING = 2, PLAYING_BACK = 3};
 	enum tp_status { CONTINUE=01, PAUSE=02, MASK1 =07, START_RECORDING=010, STOP_RECORDING=020, CONTINUE_RECORDING=030, DUMP_RECORDING=040, MASK_RECORDER = 070 };
 	enum tp_raw_data_processing_methods {
@@ -89,9 +89,9 @@ public:
 	bool _bFast;
 
 	//cameras
-	btl_img::SCamera::tp_scoped_ptr _pRGBCamera;
-	btl_img::SCamera::tp_scoped_ptr _pIRCamera;
-	btl_knt::CRGBDFrame::tp_scoped_ptr _pCurrFrame;
+	btl_img::SCamera::tp_shared_ptr _pRGBCamera;
+	btl_img::SCamera::tp_shared_ptr _pIRCamera;
+	btl_knt::CRGBDFrame::tp_shared_ptr _pCurrFrame;
 	//rgb
 	cv::Mat			_cvmRGB;
 	Mat				_cvmDep;

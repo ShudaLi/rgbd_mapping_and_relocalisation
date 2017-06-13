@@ -357,9 +357,7 @@ GpuMat cuda_icp_fr_2_fr(const Intr& sCamIntr_, float fDistThres_, float fCosAngl
 
 	//for debug
 	//cv::Mat Buf; cvgmBuf.download(Buf);
-	//PRINT(Buf);
 	//cv::Mat E; cvgmE.download(E);
-	//PRINT(E);
 
 	STranformReduction sTR;
 	sTR._cvgmBuf = cvgmBuf;

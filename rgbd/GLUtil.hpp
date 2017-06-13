@@ -32,7 +32,7 @@ class DLL_EXPORT CGLUtil
 {
 public:
 	//type
-	typedef boost::shared_ptr<CGLUtil> tp_shared_ptr;
+	typedef std::shared_ptr<CGLUtil> tp_shared_ptr;
 	typedef CGLUtil* tp_ptr;
 public:
 	//************************************
@@ -46,7 +46,7 @@ public:
 	// Parameter: btl::utility::tp_coordinate_convention eConvention_: gl convention or cv convention
 	// Parameter: const Eigen::Vector3f & eivCentroid_: the viewing position 
 	//************************************
-	CGLUtil(ushort uResolution_, ushort uPyrLevel_,btl::utility::tp_coordinate_convention eConvention_ = btl::utility::BTL_GL,const Eigen::Vector3f& eivCentroid_ = Eigen::Vector3f(1.5f,1.5f,0.3f));
+	CGLUtil(ushort uResolution_, ushort uPyrLevel_, const Eigen::Vector3f& eivCentroid_ = Eigen::Vector3f(1.5f,1.5f,0.3f));
 	void clearColorDepth();
 	void init();
 	//to initialize for the interoperation with opengl
@@ -163,7 +163,7 @@ public:
 private:
 	GLfloat _aLight[4];
 
-	btl::utility::tp_coordinate_convention _eConvention;
+	//btl::utility::tp_coordinate_convention _eConvention;
 
 };//CGLUtil
 

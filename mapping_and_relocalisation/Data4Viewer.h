@@ -16,7 +16,7 @@ void convert(const Mat& M_, Eigen::Matrix4f* peiM_);
 class CData4Viewer
 {
 public:
-	typedef boost::shared_ptr<CData4Viewer> tp_shared_ptr;
+	typedef std::shared_ptr<CData4Viewer> tp_shared_ptr;
 	enum tp_map { NORMAL_MAP = 0, SHADED_SURFACE, DEPTH_MAP };
 
 	CData4Viewer();
@@ -75,11 +75,11 @@ public:
 	btl::kinect::CVideoSourceKinect::tp_shared_ptr _pKinect;
 	btl::gl_util::CGLUtil::tp_shared_ptr _pGL;
 
-	btl_img::SCamera::tp_scoped_ptr _pVirtualCamera;
-	btl::kinect::CRGBDFrame::tp_scoped_ptr _pDepth;
-	btl::kinect::CRGBDFrame::tp_scoped_ptr _pVirtualGlobalView;
-	btl::kinect::CRGBDFrame::tp_scoped_ptr _pVirtualCameraView;
-	btl::kinect::CRGBDFrame::tp_scoped_ptr _pCameraView2;
+	btl_img::SCamera::tp_shared_ptr _pVirtualCamera;
+	btl::kinect::CRGBDFrame::tp_shared_ptr _pDepth;
+	btl::kinect::CRGBDFrame::tp_shared_ptr _pVirtualGlobalView;
+	btl::kinect::CRGBDFrame::tp_shared_ptr _pVirtualCameraView;
+	btl::kinect::CRGBDFrame::tp_shared_ptr _pCameraView2;
 
 	btl::geometry::CCubicGrids::tp_shared_ptr _pCubicGrids;
 	btl::geometry::CCubicGrids::tp_shared_ptr _pCubicGridsMoved;

@@ -48,17 +48,8 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
-//boost
-#include <boost/lexical_cast.hpp>
-#include <boost/random.hpp>
-#include <boost/generator_iterator.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/math/special_functions/fpclassify.hpp> //isnan
-#include <boost/lexical_cast.hpp>
-#include <boost/iostreams/device/file.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/filesystem.hpp>
+#include <numeric>
+#include <experimental/filesystem>
 
 //openncv
 #include <opencv2/opencv.hpp>
@@ -75,7 +66,7 @@
 #include "Converters.hpp"
 #include "GLUtil.hpp"
 #include "CVUtil.hpp"
-#include <se3.hpp>
+#include <sophus/se3.hpp>
 #include "EigenUtil.hpp"
 #include "pcl/internal.h"
 #include <map>
@@ -387,7 +378,7 @@ bool CKinFuTracker::init(const CRGBDFrame::tp_ptr pCurFrame_){
 	
 	if (_bLoadVolume ) {
 		if( !_bIsVolumeLoaded ){//load volume
-			PRINTSTR("Loading a global model...");
+			cout << ("Loading a global model...\n");
 			_pCubicGrids->loadNIFTI(_path_to_global_model);
 			loadGlobalFeaturesAndCameraPoses(_path_to_global_model);
 			_bIsVolumeLoaded = true;
@@ -422,7 +413,7 @@ bool CKinFuTracker::init(const CRGBDFrame::tp_ptr pCurFrame_){
 
 	//store current key point
 	storeCurrFrame( pCurFrame_ );
-	PRINTSTR("End of init");
+	cout << ("End of init\n");
 
 	return true;
 }
@@ -515,7 +506,7 @@ void CKinFuTracker::extractFeatures(const CRGBDFrame::tp_ptr pFrame_, int nFeatu
 
 		break;
 	default:
-		PRINTSTR("feature type Error");
+		cout << ("feature type Error\n");
 		break;
 	}
 	return;
@@ -553,18 +544,15 @@ void CKinFuTracker::sparsePoseEstimation(const Mat& pts_World_, const Mat& nls_W
 	switch( _nPoseEstimationMethod ){
 	case AORansac:
 		fErrorBest = btl::utility::aoRansac<float>(X_w, X_c, thre_3d, nRansacIter, &*pR_, &*pT_, &*ptr_inliers_, ARUN);
-		//PRINT( fErrorBest );
 		break;
 	case AONn2dRansac:
 		EA = btl::utility::aoWithNormalWith2dConstraintRansac<float>(X_w, N_w, X_c, N_c, thre_3d, 0.56f, vis_ang_thre, nRansacIter, &*pR_, &*pT_, &*ptr_inliers_);
-		//PRINT( EA );
 		break;
 	case AONn2dRansac2:
 		EA = btl::utility::aoWithNormaln2dConstraintRansac2<float>(X_w, N_w, X_c, N_c, thre_3d, 0.56f, vis_ang_thre, nRansacIter, &*pR_, &*pT_, &*ptr_inliers_);
-		//PRINT( EA );
 		break;
 	default:
-		PRINTSTR("Failure - unrecognized pose estimation problem.");
+		cout << ("Failure - unrecognized pose estimation problem.\n");
 		break;
 	}
 
@@ -608,8 +596,8 @@ void CKinFuTracker::initialPoseEstimation(CRGBDFrame::tp_ptr pCurFrame_, const v
 		int nCandidates = std::accumulate( vCandidates.begin(), vCandidates.end(), 0);
 		cout << "# of kp = " << nCandidates << endl;
 		if (nCandidates < _nMinFeatures[_nResolution]){
-			PRINTSTR("Failure - not enough salient features in current frame");
-			PRINT(nCandidates);
+			cout << ("Failure - not enough salient features in current frame\n");
+			cout << (nCandidates) << endl;
 			return;
 		}
 
@@ -665,7 +653,7 @@ void CKinFuTracker::initialPoseEstimation(CRGBDFrame::tp_ptr pCurFrame_, const v
 		t = (double)getTickCount();
 	}
 	else{
-		PRINTSTR(" Failure -- No effective initial matching method specified.");
+		cout << (" Failure -- No effective initial matching method specified.\n");
 	}
 	return;
 }
@@ -673,7 +661,7 @@ void CKinFuTracker::initialPoseEstimation(CRGBDFrame::tp_ptr pCurFrame_, const v
 void CKinFuTracker::tracking( CRGBDFrame::tp_ptr pCurFrame_ )
 {
 	int nStage = _nStage;
-	PRINTSTR("track() starts.");
+	cout << ("track() starts.\n");
 	//parameters
 	_K = _K_tracking;
 	_nStage = btl::Tracking_n_Mapping;
@@ -725,15 +713,15 @@ void CKinFuTracker::tracking( CRGBDFrame::tp_ptr pCurFrame_ )
 	}//if current frame is lost aligned
 	else{
 		
-		PRINTSTR("Tracking fails.");
+		cout << ("Tracking fails.\n");
 		//goto relocalisation
-		PRINTSTR("Relocalisation starts.");
+		cout << ("Relocalisation starts.\n");
 		if (relocalise(pCurFrame_)){
-			PRINTSTR("Relocalisation succeeds.");
+			cout << ("Relocalisation succeeds.\n");
 		}
 		else{
 			pCurFrame_->gpuTransformToWorld(); //transform from camera local into world reference
-			PRINTSTR("Relocalisation fails.");
+			cout << ("Relocalisation fails.\n");
 		}
 	}
 	_nStage = nStage;
@@ -748,7 +736,7 @@ bool CKinFuTracker::relocalise(CRGBDFrame::tp_ptr pCurFrame_)
 	//assertion
 	if (_nMatchingMethod == IDF || _nMatchingMethod == GM || _nMatchingMethod == GM_GPU ){
 		if (_pCubicGrids->totalFeatures() < 50) {
-			PRINTSTR("Failure - too less global features has been learnt before.");
+			cout << ("Failure - too less global features has been learnt before.\n");
 			_nStage = nStage;
 			return false; // if no effective depth or no features in the global feature set, nMatchedPairs will be 0. 
 		}
@@ -860,7 +848,7 @@ void CKinFuTracker::findCorrespondences( const vector<GpuMat>& gpu_descriptors_t
 	}
 	
 	if(_nAppearanceMatched == 0 ) {
-		PRINTSTR("Failure - There is no selected features in current frame.");
+		cout << ("Failure - There is no selected features in current frame.\n");
 		ptr_v_selected_inliers_->clear(); // 
 		_v_selected_inliers_reloc.clear();
 		return;
@@ -1035,10 +1023,6 @@ void CKinFuTracker::findCorrespondences( const vector<GpuMat>& gpu_descriptors_t
 		}
 		ptr_v_selected_inliers_->push_back( selected_inlier_orig ); // 
 		_v_selected_inliers_reloc.push_back( selected_inlier_reloc );
-		//PRINT( _gpu_descriptor_curr[0].rows );
-		//PRINT( selected_inlier_orig );
-		//PRINT( _nAppearanceMatched );
-		//PRINT( selected_inlier_reloc );
 	}
 	return;
 }
@@ -1076,9 +1060,6 @@ void CKinFuTracker::gpuExtractCorrespondencesMaxScore(const GpuMat& hamming_dist
 	calcScores(credibility_, &column_scores);
 	Mat columIdx;
 	sortIdx(column_scores, columIdx, CV_SORT_EVERY_ROW + CV_SORT_DESCENDING); //
-	//PRINT( count );
-	//PRINT( column_scores );
-	//PRINT( overall_score );
 
 	const int ChainLength = _aMaxChainLength[_nResolution] * 10; //max correct chain out of candidate matches, inlier ratio times total # of matches
 	const int TotalTrials = 10; //each trail may run par
@@ -1183,7 +1164,6 @@ void CKinFuTracker::gpuExtractCorrespondencesMaxScore(const GpuMat& hamming_dist
 	//4. chose the longest matches sequence
 	/////////////////////////////////////////////////////////////////////////////////
 
-	//PRINT(node_numbers);
 	Mat trail_idx;
 	sortIdx(node_numbers, trail_idx, CV_SORT_EVERY_ROW + CV_SORT_DESCENDING); // rank the trails, the one with the most nodes rank higher
 	for (int i = 0; i < K_; i++) {
@@ -1367,7 +1347,6 @@ void CKinFuTracker::displayFeatures2D(int lvl_, CRGBDFrame::tp_ptr pCurFrame_) c
 		//	float angle = keypoint.ptr<float>(7)[i];//radian
 		//	angle = angle / 180.f * float(M_PI);
 		//	Point2f pt2 = cen + radius * Point2f(cos(angle),sin(angle));
-		//	//PRINT(radius);
 		//	circle(*pCurFrame_->_acvmShrPtrPyrRGBs[0], cen, int(radius + .5f), Scalar(0, 0, 255), 1, LINE_4, 0);
 		//	line(*pCurFrame_->_acvmShrPtrPyrRGBs[0], cen, pt2,Scalar(0,255,0));
 		//}
@@ -1466,7 +1445,7 @@ void CKinFuTracker::displayGlobalRelocalization()
 	for (int i = 0; i < inliers_reloc.cols; i++){
 		int nIdx = inliers_reloc.ptr<int>()[i];
 		if (nIdx >= pts_global_reloc.cols){
-			PRINTSTR("Failure - inlier index incorrect.");
+			cout << ("Failure - inlier index incorrect.\n");
 			continue;
 		}
 		const float3* pPt_global = pts_global_reloc.ptr<float3>() + nIdx;
@@ -1702,19 +1681,19 @@ void CKinFuTracker::displayVisualRays(btl::gl_util::CGLUtil::tp_ptr pGL_,  const
 
 void CKinFuTracker::getPrevView( Eigen::Affine3f* pSystemPose_ ){
 	*pSystemPose_ = _v_prj_c_f_w_training.back();
-	PRINT(_v_prj_c_f_w_training.back().matrix());
+	cout << (_v_prj_c_f_w_training.back().matrix()) << endl;
 	return;
 }
 void CKinFuTracker::getNextView( Eigen::Affine3f* pSystemPose_ ){
 	*pSystemPose_ = _v_prj_c_f_w_training.front();
-	PRINT(_v_prj_c_f_w_training.front().matrix());
+	cout << (_v_prj_c_f_w_training.front().matrix()) << endl;
 	return;
 }
 
 void CKinFuTracker::storeGlobalFeaturesAndCameraPoses(const string& folder_)
 {
-	boost::filesystem::path dir(folder_.c_str());
-	if (boost::filesystem::create_directories(dir)) {
+	std::experimental::filesystem::path dir(folder_.c_str());
+	if (std::experimental::filesystem::create_directories(dir)) {
 		std::cout << "Success" << "\n";
 	}
 

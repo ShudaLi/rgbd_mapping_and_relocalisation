@@ -32,7 +32,7 @@ namespace btl{ namespace geometry
 	{
 		//type
 	public:
-		typedef boost::shared_ptr<CCubicGrids> tp_shared_ptr;
+		typedef std::shared_ptr<CCubicGrids> tp_shared_ptr;
 		enum {_X = 1, _Y = 2, _Z = 3};
 
 		enum

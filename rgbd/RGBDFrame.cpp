@@ -29,15 +29,8 @@
 #include <cuda.h>
 #include <cuda_gl_interop.h>
 #include <cuda_runtime_api.h>
-//boost
-#include <boost/random.hpp>
-#include <boost/generator_iterator.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/math/special_functions/fpclassify.hpp> //isnan
-#include <boost/lexical_cast.hpp>
 //stl
+#include <memory>
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -54,7 +47,7 @@
 #include <opencv2/cudafeatures2d.hpp>
 #include <opencv2/cudaarithm.hpp>
 #include <opencv2/cudaimgproc.hpp>
-#include <se3.hpp>
+#include <sophus/se3.hpp>
 
 #include "OtherUtil.hpp"
 #include "Converters.hpp"
@@ -168,8 +161,6 @@ void btl::kinect::CRGBDFrame::allocate(){
 	}
 	_normal_map.create(__aRGBH[_uResolution],__aRGBW[_uResolution],CV_8UC3);
 
-	_eConvention = btl::utility::BTL_CV;
-
 	//rendering
 	glPixelStorei ( GL_UNPACK_ALIGNMENT, 4 ); // 4
 }
@@ -236,7 +227,6 @@ void btl::kinect::CRGBDFrame::copyTo( CRGBDFrame* pKF_, const short sLevel_ ) co
 	if (!_pry_mask[sLevel_]->empty()) _pry_mask[sLevel_]->copyTo(*pKF_->_pry_mask[sLevel_]);
 	_acvgmShrPtrPyrRGBs[sLevel_]->copyTo(*pKF_->_acvgmShrPtrPyrRGBs[sLevel_]);
 	_acvgmShrPtrPyrBWs[sLevel_]->copyTo(*pKF_->_acvgmShrPtrPyrBWs[sLevel_]);
-	pKF_->_eConvention = _eConvention;
 }
 
 void btl::kinect::CRGBDFrame::copyTo( CRGBDFrame* pKF_ ) const{
@@ -291,11 +281,11 @@ void btl::kinect::CRGBDFrame::exportYML(const std::string& strPath_, const std::
 
 	std::string strVariableName;
 	for (int i = 0; i < _uPyrHeight; i++){
-		strVariableName = "acvmShrPtrPyrPts";	strVariableName += boost::lexical_cast<std::string> ( i ); cFSWrite << strVariableName.c_str() << *_acvmShrPtrPyrPts[i];
-		strVariableName = "acvmShrPtrPyrNls";	strVariableName += boost::lexical_cast<std::string> ( i ); cFSWrite << strVariableName.c_str() << *_acvmShrPtrPyrNls[i];
-		strVariableName = "acvmShrPtrPyrRGBs";	strVariableName += boost::lexical_cast<std::string> ( i ); cFSWrite << strVariableName.c_str() << *_acvmShrPtrPyrRGBs[i];
-		strVariableName = "acvmShrPtrPyrBWs";	strVariableName += boost::lexical_cast<std::string> ( i ); cFSWrite << strVariableName.c_str() << *_acvmShrPtrPyrBWs[i];
-		strPathFileName = strPath_+strYMLName_; strPathFileName += boost::lexical_cast<std::string> ( i );	strPathFileName += ".bmp";	cv::imwrite(strPathFileName,*_acvmShrPtrPyrBWs[i]);
+		strVariableName = "acvmShrPtrPyrPts";	strVariableName += to_string ( i ); cFSWrite << strVariableName.c_str() << *_acvmShrPtrPyrPts[i];
+		strVariableName = "acvmShrPtrPyrNls";	strVariableName += to_string ( i ); cFSWrite << strVariableName.c_str() << *_acvmShrPtrPyrNls[i];
+		strVariableName = "acvmShrPtrPyrRGBs";	strVariableName += to_string ( i ); cFSWrite << strVariableName.c_str() << *_acvmShrPtrPyrRGBs[i];
+		strVariableName = "acvmShrPtrPyrBWs";	strVariableName += to_string ( i ); cFSWrite << strVariableName.c_str() << *_acvmShrPtrPyrBWs[i];
+		strPathFileName = strPath_+strYMLName_; strPathFileName += to_string ( i );	strPathFileName += ".bmp";	cv::imwrite(strPathFileName,*_acvmShrPtrPyrBWs[i]);
 	}
 	
 	cFSWrite.release();
@@ -317,10 +307,10 @@ void btl::kinect::CRGBDFrame::importYML(const std::string& strPath_, const std::
 
 	std::string strVariableName;
 	for (int i = 0; i < _uPyrHeight; i++){
-		strVariableName = "acvmShrPtrPyrPts";  strVariableName += boost::lexical_cast<std::string> ( i ); cFSRead[strVariableName.c_str()] >> *_acvmShrPtrPyrPts[i];
-		strVariableName = "acvmShrPtrPyrNls";  strVariableName += boost::lexical_cast<std::string> ( i ); cFSRead[strVariableName.c_str()] >> *_acvmShrPtrPyrNls[i];
-		strVariableName = "acvmShrPtrPyrRGBs"; strVariableName += boost::lexical_cast<std::string> ( i ); cFSRead[strVariableName.c_str()] >> *_acvmShrPtrPyrRGBs[i];
-		strVariableName = "acvmShrPtrPyrBWs";  strVariableName += boost::lexical_cast<std::string> ( i ); cFSRead[strVariableName.c_str()] >> *_acvmShrPtrPyrBWs[i];
+		strVariableName = "acvmShrPtrPyrPts";  strVariableName += to_string ( i ); cFSRead[strVariableName.c_str()] >> *_acvmShrPtrPyrPts[i];
+		strVariableName = "acvmShrPtrPyrNls";  strVariableName += to_string ( i ); cFSRead[strVariableName.c_str()] >> *_acvmShrPtrPyrNls[i];
+		strVariableName = "acvmShrPtrPyrRGBs"; strVariableName += to_string ( i ); cFSRead[strVariableName.c_str()] >> *_acvmShrPtrPyrRGBs[i];
+		strVariableName = "acvmShrPtrPyrBWs";  strVariableName += to_string ( i ); cFSRead[strVariableName.c_str()] >> *_acvmShrPtrPyrBWs[i];
 	}
 
 	cFSRead.release();
@@ -436,7 +426,6 @@ float btl::kinect::CKeyFrame::calcRTFromPair(const CKeyFrame& sPrevKF_, const do
 
 	int nSize = _vDepthIdxCur.size(); 
 	*pInliers_ = nSize;
-	PRINT(nSize);
 	//if nSize smaller than a threshould, quit
 	MatrixXf eimCurCam ( 3, nSize ), eimRefWorld ( 3, nSize );
 	std::vector< int >::const_iterator cit_Cur = _vDepthIdxCur.begin();
@@ -454,10 +443,6 @@ float btl::kinect::CKeyFrame::calcRTFromPair(const CKeyFrame& sPrevKF_, const do
 
 	float fS2;
 	float dErrorBest = btl::utility::absoluteOrientation < float > ( eimRefWorld, eimCurCam ,0.1, 15., false, &_eimRw, &_eivTw, &fS2 ); // eimB_ = R * eimA_ + T;
-
-	//PRINT ( dErrorBest );
-	//PRINT ( _eimR );
-	//PRINT ( _eivT );
 
 	return dErrorBest;
 }

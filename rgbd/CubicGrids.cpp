@@ -29,13 +29,10 @@
 #include <cuda.h>
 #include <cuda_gl_interop.h>
 #include <cuda_runtime_api.h>
-//boost
-#include <boost/random.hpp>
-#include <boost/generator_iterator.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/filesystem.hpp>
+
+#include <memory>
+#include <numeric>
+#include <experimental/filesystem>
 //nifti
 #include <nifti/nifti1_io.h>   /* directly include I/O library functions */
 //stl
@@ -65,7 +62,7 @@
 #include <opencv2/core/cuda/common.hpp>
 //eigen
 #include <Eigen/Core>
-#include <se3.hpp>
+#include <sophus/se3.hpp>
 //nifti
 #include <nifti/nifti1_io.h>
 #define MIN_HEADER_SIZE 348
@@ -225,7 +222,6 @@ void CCubicGrids::integrateFeatures( const pcl::device::Intr& cCam_, const Matri
 								gpu_inliers_, nTotalInliers_, &_gpu_feature_volume_coordinate, &_gpu_counter,
 								&_vTotalGlobal, &_gpu_global_3d_key_points, &_gpu_global_descriptors);
 
-	PRINT(_vTotalGlobal[0]);
 	return;
 }
 
@@ -296,7 +292,6 @@ void CCubicGrids::renderBoxGL() const
 
 //render all voxels if lvl_ <0 otherwise render lvl_ voxels
 void CCubicGrids::renderOccupiedVoxels(btl::gl_util::CGLUtil::tp_ptr pGL_,int lvl_) {
-	//if (lvl == 3) printf("IDX \t %d\n", idx);
 	_vOccupied = btl::device::cuda_get_occupied_vg(_gpu_YXxZ_vg_idx, _fFeatureVoxelSizeM, _nFeatureScale, _gpu_pts, _vFeatureResolution, _gpu_feature_idx);
 	float fRadius = 0.004f;
 	glLineWidth(1.f);
@@ -347,16 +342,16 @@ void CCubicGrids::renderOccupiedVoxels(btl::gl_util::CGLUtil::tp_ptr pGL_,int lv
 
 void CCubicGrids::loadNIFTI( const string& strPath_ )
 {
-	PRINTSTR("Load tsdf...");
+	cout << ("Load tsdf...") << endl;
 	//for tsdf
 	{
 		string volume_name = strPath_ + string("tsdf_volume.nii.gz");
 		nifti_image* ptr_nim = nifti_image_read( volume_name.c_str() , 1 ) ;
-		if( !ptr_nim ) PRINTSTR("load nifti volume incorrectly");
+		if (!ptr_nim) cout << ("load nifti volume incorrectly") << endl;
 
 		string weight_name = strPath_ + string("tsdf_weight.nii.gz");
 		nifti_image* ptr_weight = nifti_image_read(weight_name.c_str(), 1);
-		if (!ptr_weight) PRINTSTR("load nifti weight incorrectly");
+		if (!ptr_weight) cout << ("load nifti weight incorrectly") << endl;
 
 		vector<Mat> vMats;
 
@@ -379,16 +374,16 @@ void CCubicGrids::loadNIFTI( const string& strPath_ )
 		nifti_image_free(ptr_nim);
 		nifti_image_free(ptr_weight);
 	}
-	PRINTSTR("Load feature idx...");
+	cout << ("Load feature idx...") << endl;
 	//for feature idx
 	for (int i = 0; i<_nFeatureScale; i++)
 	{
-		PRINT(i);
+		cout << (i) << endl;
 		ostringstream convert;   // stream used for the conversion
 		convert << i;      // insert the textual representation of 'Number' in the characters in the stream
 		string volume_name = strPath_ + string("feature_idx_")  + convert.str() + string(".nii.gz"); 
 		nifti_image* ptr_nim = nifti_image_read( volume_name.c_str() , 1 ) ;
-		if( !ptr_nim ) PRINTSTR("load nifti file incorrectly");
+		if( !ptr_nim ) cout << ("load nifti file incorrectly") << endl;
 
 		Mat cvmFeatureIdx(_vFeatureResolution[i].x * _vFeatureResolution[i].y, _vFeatureResolution[i].z, CV_32SC1);
 		cvmFeatureIdx.setTo(Scalar(-1));
@@ -406,8 +401,8 @@ void CCubicGrids::loadNIFTI( const string& strPath_ )
 
 void CCubicGrids::storeNIFTI(const string& strPath_) const
 {
-	boost::filesystem::path dir(strPath_.c_str());
-	if(boost::filesystem::create_directories(dir)) {
+	std::experimental::filesystem::path dir(strPath_.c_str());
+	if(std::experimental::filesystem::create_directories(dir)) {
 		std::cout << "Success" << "\n";
 	}
 
@@ -764,13 +759,11 @@ double CCubicGrids::icpFrm2Frm(const CRGBDFrame::tp_ptr pCurFrame_, const CRGBDF
 	for (short sPyrLevel = pCurFrame_->pyrHeight() - 1; sPyrLevel >= 0; sPyrLevel--){
 		// for each pyramid level we have a min energy and corresponding best R t
 		if (asICPIterations_[sPyrLevel] > 0){
-			//PRINT(sPyrLevel);
 			dMinEnergy = btl::device::calc_energy_icp_fr_2_fr(_intrinsics(sPyrLevel),
 				fDistThreshold, fCosAngleThres,
 				devRwCurTrans, devTwCur, devRwPrev, devTwPrev, *pCurFrame_->_acvgmShrPtrPyrDepths[sPyrLevel],
 				*pPrevFrame_->_acvgmShrPtrPyrPts[sPyrLevel], *pPrevFrame_->_acvgmShrPtrPyrNls[sPyrLevel],
 				*pCurFrame_->_acvgmShrPtrPyrPts[sPyrLevel], *pCurFrame_->_acvgmShrPtrPyrNls[sPyrLevel], *pCurFrame_->_pry_mask[sPyrLevel]);
-			//PRINT(dMinEnergy);
 		}
 
 		for ( short sIter = 0; sIter < asICPIterations_[sPyrLevel]; ++sIter ) {
@@ -785,7 +778,7 @@ double CCubicGrids::icpFrm2Frm(const CRGBDFrame::tp_ptr pCurFrame_, const CRGBDF
 																	fDistThreshold, fCosAngleThres,
 																	devRwCurTrans, devTwCur, devRwPrev, devTwPrev, *pCurFrame_->_acvgmShrPtrPyrDepths[sPyrLevel],
 																	*pPrevFrame_->_acvgmShrPtrPyrPts[sPyrLevel], *pPrevFrame_->_acvgmShrPtrPyrNls[sPyrLevel],
-																	*pCurFrame_->_acvgmShrPtrPyrPts[sPyrLevel], *pCurFrame_->_acvgmShrPtrPyrNls[sPyrLevel], *pCurFrame_->_pry_mask[sPyrLevel]);			////PRINT(dEnergy);
+																	*pCurFrame_->_acvgmShrPtrPyrPts[sPyrLevel], *pCurFrame_->_acvgmShrPtrPyrNls[sPyrLevel], *pCurFrame_->_pry_mask[sPyrLevel]);			
 			if (dEnergy < dMinEnergy) {
 				dMinEnergy = dEnergy;
 				eimRwCurBest = eimRwCurTmp;
@@ -838,7 +831,7 @@ double CCubicGrids::verifyPoseHypothesesAndRefine(CRGBDFrame::tp_ptr pCurFrame_,
 		btl::utility::convertPrj2Rnt(v_k_hypothese_poses[i], &eimRw, &eivTw);
 
 		float s = eimRw.sum();
-		if (fabs(s) < 0.0001 || boost::math::isnan<float>(s)){
+		if (fabs(s) < 0.0001 || std::isnan<float>(s)){
 			energy_ICP.at<double>(0, i) = numeric_limits<double>::max();
 			v_refined_R.push_back(Matrix3f::Zero());
 			v_refined_t.push_back(Vector3f::Zero());
@@ -856,10 +849,9 @@ double CCubicGrids::verifyPoseHypothesesAndRefine(CRGBDFrame::tp_ptr pCurFrame_,
 				rayCast(&*pPrevFrame_,1);
 			}
 			energy_ICP.at<double>(0, i) = icpFrm2Frm(pCurFrame_, pPrevFrame_, asICPIterations, &eimRw, &eivTw, &eivIter);
-			//PRINT(energy_ICP.at<double>( 0, i ));
 			break;
 		default:
-			PRINTSTR("Failure - unrecognized ICP method.");
+			cout << ("Failure - unrecognized ICP method.") << endl;
 			break;
 		}
 		if (energy_ICP.at<double>(0, i) != energy_ICP.at<double>(0, i) || energy_ICP.at<double>(0, i) < 0 )
@@ -872,7 +864,6 @@ double CCubicGrids::verifyPoseHypothesesAndRefine(CRGBDFrame::tp_ptr pCurFrame_,
 	//use the best hypotheses
 	//Mat SortedIdx;
 	//cv::sortIdx(energy_ICP, SortedIdx, CV_SORT_EVERY_ROW + CV_SORT_ASCENDING);
-	//PRINT(energy_ICP);
 	int best_k;// = SortedIdx.at<int>(0, 0);
 	for (best_k = 0; best_k < v_k_hypothese_poses.size(); best_k++){
 		dICPEnergy = energy_ICP.at<double>(0, best_k);
@@ -885,7 +876,6 @@ double CCubicGrids::verifyPoseHypothesesAndRefine(CRGBDFrame::tp_ptr pCurFrame_,
 		}
 	}
 
-	//PRINT(best_k);
 	best_k >= v_k_hypothese_poses.size() ? 0 : best_k;
 	*p_best_idx_ = best_k;
 	//show refined pose
@@ -898,7 +888,7 @@ double CCubicGrids::verifyPoseHypothesesAndRefine(CRGBDFrame::tp_ptr pCurFrame_,
 		double dICPEnergyFinal = numeric_limits<double>::max();
 		Matrix3f eimRw = *pRw_; Vector3f eivTw = *pTw_;
 		float s = eimRw.sum();
-		if (fabs(s) > 0.0001 && !boost::math::isnan<float>(s)){
+		if (fabs(s) > 0.0001 && !std::isnan<float>(s)){
 			//ICP -- refine R,t
 			Eigen::Vector4i eivIter;
 			switch (nICPMethod_){
@@ -916,7 +906,7 @@ double CCubicGrids::verifyPoseHypothesesAndRefine(CRGBDFrame::tp_ptr pCurFrame_,
 				}
 				break;
 			default:
-				PRINTSTR("Failure - unrecognized ICP method.");
+				cout << ("Failure - unrecognized ICP method.") << endl;
 				break;
 			}
 		}
@@ -924,7 +914,7 @@ double CCubicGrids::verifyPoseHypothesesAndRefine(CRGBDFrame::tp_ptr pCurFrame_,
 		dICPEnergy = dICPEnergyFinal;
 	}
 	pCurFrame_->setRTw(*pRw_, *pTw_);
-	PRINT(dICPEnergy);
+	cout << (dICPEnergy) << endl;
 	return dICPEnergy;
 }
 
@@ -950,7 +940,7 @@ void CCubicGrids::extractRTFromBuffer(const cuda::GpuMat& cvgmSumBuf_, Eigen::Ma
 	double dDet = A.determinant();
 	if (fabs(dDet) < 1e-15 || dDet != dDet){
 		if (dDet != dDet)
-			PRINTSTR("Failure -- dDet cannot be qnan. ");
+			cout << ("Failure -- dDet cannot be qnan. ") << endl;
 		//reset ();
 		return;
 	}//if dDet is rational

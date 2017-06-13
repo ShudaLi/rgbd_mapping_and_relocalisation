@@ -28,15 +28,15 @@
 #include <cuda.h>
 #include <cuda_gl_interop.h>
 #include <cuda_runtime_api.h>
+
+#include <memory>
 //opencv
 #include <opencv2/core.hpp>
 #include <opencv2/cudaimgproc.hpp>
 #include <opencv2/cudawarping.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <opencv2/cudaarithm.hpp>
 #include <Eigen/Dense>
-#include <se3.hpp>
+#include <sophus/se3.hpp>
 
 #include "OtherUtil.hpp"
 #include "GLUtil.hpp"
@@ -91,7 +91,6 @@ void SCamera::generateMapXY4Undistort()
 }
 void SCamera::gpuUndistort( const GpuMat& original_img_, GpuMat* ptr_undistorted_ ) const{
 	if ( !_bIsUndistortionOn || _cvgmMapX.empty() || _cvgmMapY.empty() ) {
-		//PRINTSTR("Warning - undistortion is off. " );
 		original_img_.copyTo( *ptr_undistorted_ );
 	}
 	else

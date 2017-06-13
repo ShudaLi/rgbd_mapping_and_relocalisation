@@ -37,7 +37,7 @@ namespace btl{ namespace geometry
 	{
 	public:
 		//type
-		typedef boost::shared_ptr<CKinFuTracker> tp_shared_ptr;
+		typedef std::shared_ptr<CKinFuTracker> tp_shared_ptr;
 
 		enum{ RANSACPnP, AO, AONn2d, AORansac, AONRansac, AONn2dRansac, AONn2dRansac2, AONMDn2dRansac }; //pose estimation approaches
 		enum{ IDF = 0, GM, GM_GPU, BUILD_GT, ICP }; //matching approaches
@@ -133,7 +133,7 @@ namespace btl{ namespace geometry
 		int _nFeatureName;
 
 		Ptr<cv::xfeatures2d::SURF> _pSurf;
-		boost::scoped_ptr<cuda::ORB> _pORBGpu;
+		std::shared_ptr<cuda::ORB> _pORBGpu;
 		Ptr<BRISK> _pBRISK;
 
 		vector<GpuMat> _gpu_key_points_prev;
@@ -182,9 +182,9 @@ namespace btl{ namespace geometry
 		int _n_detected_features_curr;
 		int _n_detected_features_prev;
 
-		//boost::scoped_ptr<cuda::DescriptorMatcher> _pMatcherGpuHamming;  
+		//std::shared_ptr<cuda::DescriptorMatcher> _pMatcherGpuHamming;  
 		Ptr<cuda::DescriptorMatcher> _pMatcherGpuHamming;
-		boost::scoped_ptr<cv::FlannBasedMatcher> _pMatcherFlann;
+		std::shared_ptr<cv::FlannBasedMatcher> _pMatcherFlann;
 
 		GLUquadricObj*   _quadratic;	// Storage For Our Quadratic Objects
 
@@ -224,7 +224,7 @@ namespace btl{ namespace geometry
 		int _total_refined_features;
 
 	public:
-		CRGBDFrame::tp_scoped_ptr _pPrevFrameWorld;
+		CRGBDFrame::tp_shared_ptr _pPrevFrameWorld;
 		int _nStage; //tracking, relocalisation
 		int _buffer_size;
 		int _nHessianThreshold;

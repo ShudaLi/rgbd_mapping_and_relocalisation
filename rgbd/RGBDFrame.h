@@ -34,8 +34,7 @@ using namespace cv::cuda;
 class DLL_EXPORT CRGBDFrame {
 	//type
 public:
-	typedef boost::shared_ptr< CRGBDFrame > tp_shared_ptr;
-	typedef boost::scoped_ptr< CRGBDFrame > tp_scoped_ptr;
+	typedef std::shared_ptr< CRGBDFrame > tp_shared_ptr;
 	typedef CRGBDFrame* tp_ptr;
 	enum tp_cluster { NORMAL_CLUSTER, DISTANCE_CLUSTER};
 
@@ -122,27 +121,27 @@ private:
 public:
 	btl::image::SCamera::tp_ptr _pRGBCamera; //share the content of the RGBCamera with those from VideoKinectSource
 	//host
-	boost::shared_ptr<cv::Mat> _acvmShrPtrPyrDepths[4];
-	boost::shared_ptr<cv::Mat> _acvmShrPtrPyrPts[4]; //using pointer array is because the vector<cv::Mat> has problem when using it &vMat[0] in calling a function
-	boost::shared_ptr<cv::Mat> _acvmShrPtrPyrNls[4]; //CV_32FC3 type
-	boost::shared_ptr<cv::Mat> _acvmShrPtrPyrReliability[4]; //cpu version 
-	boost::shared_ptr<cv::Mat> _acvmShrPtrPyrRGBs[4];
-	boost::shared_ptr<cv::Mat> _acvmShrPtrPyrBWs[4];
+	std::shared_ptr<cv::Mat> _acvmShrPtrPyrDepths[4];
+	std::shared_ptr<cv::Mat> _acvmShrPtrPyrPts[4]; //using pointer array is because the vector<cv::Mat> has problem when using it &vMat[0] in calling a function
+	std::shared_ptr<cv::Mat> _acvmShrPtrPyrNls[4]; //CV_32FC3 type
+	std::shared_ptr<cv::Mat> _acvmShrPtrPyrReliability[4]; //cpu version 
+	std::shared_ptr<cv::Mat> _acvmShrPtrPyrRGBs[4];
+	std::shared_ptr<cv::Mat> _acvmShrPtrPyrBWs[4];
 	//device
-	boost::shared_ptr<GpuMat> _acvgmShrPtrPyrDepths[4];
-	boost::shared_ptr<GpuMat> _acvgmShrPtrPyrPts[4]; //using pointer array is because the vector<cv::Mat> has problem when using it &vMat[0] in calling a function
-	boost::shared_ptr<GpuMat> _acvgmShrPtrPyrNls[4]; //CV_32FC3
-	boost::shared_ptr<GpuMat> _acvgmShrPtrPyrReliability[4]; //CV_32FC1 ratio = largest / smallest eigen value
-	boost::shared_ptr<GpuMat> _acvgmShrPtrPyrRGBs[4];
-	boost::shared_ptr<GpuMat> _acvgmShrPtrPyrBWs[4];
+	std::shared_ptr<GpuMat> _acvgmShrPtrPyrDepths[4];
+	std::shared_ptr<GpuMat> _acvgmShrPtrPyrPts[4]; //using pointer array is because the vector<cv::Mat> has problem when using it &vMat[0] in calling a function
+	std::shared_ptr<GpuMat> _acvgmShrPtrPyrNls[4]; //CV_32FC3
+	std::shared_ptr<GpuMat> _acvgmShrPtrPyrReliability[4]; //CV_32FC1 ratio = largest / smallest eigen value
+	std::shared_ptr<GpuMat> _acvgmShrPtrPyrRGBs[4];
+	std::shared_ptr<GpuMat> _acvgmShrPtrPyrBWs[4];
 
-	boost::shared_ptr<GpuMat> _acvgmShrPtrPyrDisparity[4];
-	boost::shared_ptr<GpuMat> _acvgmShrPtrPyr32FC1Tmp[4];
-	boost::shared_ptr<GpuMat> _pcvgmPrev,_pcvgmCurr,_pcvgmU,_pcvgmV;
+	std::shared_ptr<GpuMat> _acvgmShrPtrPyrDisparity[4];
+	std::shared_ptr<GpuMat> _acvgmShrPtrPyr32FC1Tmp[4];
+	std::shared_ptr<GpuMat> _pcvgmPrev,_pcvgmCurr,_pcvgmU,_pcvgmV;
 
-	boost::shared_ptr<GpuMat> _pry_mask[4];
+	std::shared_ptr<GpuMat> _pry_mask[4];
 	//clusters
-	/*static*/ boost::shared_ptr<cv::Mat> _acvmShrPtrAA[4];//for rendering
+	/*static*/ std::shared_ptr<cv::Mat> _acvmShrPtrAA[4];//for rendering
 		
 	GpuMat _normal_map;
 	GpuMat _depth_gray;
@@ -164,7 +163,6 @@ public:
 	bool _bGPURender;
 
 
-	btl::utility::tp_coordinate_convention _eConvention;
 	tp_cluster _eClusterType;
 
 private:

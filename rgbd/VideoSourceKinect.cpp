@@ -28,6 +28,8 @@
 #include <cuda.h>
 #include <cuda_gl_interop.h>
 #include <cuda_runtime_api.h>
+
+#include <memory>
 //opencv
 #include <opencv2/cudaarithm.hpp>
 #include <opencv2/cudafilters.hpp>
@@ -39,16 +41,10 @@
 #include <opencv2/imgproc.hpp>
 //nifti
 #include <nifti/nifti1_io.h>   /* directly include I/O library functions */
-//boost
-#include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/random.hpp>
-#include <boost/generator_iterator.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/filesystem.hpp>
+#include <experimental/filesystem>
 //eigen
 #include <Eigen/Core>
-#include <se3.hpp>
+#include <sophus/se3.hpp>
 //openni
 #include <OpenNI.h>
 //self
@@ -118,7 +114,7 @@ void CVideoSourceKinect::init()
 	_nMode = SIMPLE_CAPTURING; 
 	//allocate
 
-	PRINTSTR("Allocate buffers...");
+	cout << ("Allocate buffers...") << endl;
 	_cvmRGB		   .create( __aRGBH[_uResolution], __aRGBW[_uResolution], CV_8UC3 );
 	_undist_rgb	   .create( __aRGBH[_uResolution], __aRGBW[_uResolution], CV_8UC3 );
 	_depth_float	   .create( __aDepthH[_uResolution], __aDepthW[_uResolution], CV_32FC1);
@@ -154,20 +150,22 @@ void CVideoSourceKinect::initKinect()
 {
 	init();
 	_nMode = SIMPLE_CAPTURING;
-	PRINTSTR("Initialize RGBD camera...");
+	cout << ("Initialize RGBD camera...") << endl;
 	//inizialization 
 	Status nRetVal = openni::OpenNI::initialize();
 	printf("After initialization:\n%s\n", openni::OpenNI::getExtendedError());
-	nRetVal = _device.open(openni::ANY_DEVICE);			CHECK_RC_(nRetVal, "Initialize _cContext"); 
+	nRetVal = _device.open(openni::ANY_DEVICE);			//CHECK_RC_(nRetVal, "Initialize _cContext"); 
 	
-	nRetVal = _depth.create(_device, openni::SENSOR_DEPTH); CHECK_RC_(nRetVal, "Initialize _cContext"); _depth.setMirroringEnabled(false);
-	nRetVal = _color.create(_device, openni::SENSOR_COLOR); CHECK_RC_(nRetVal, "Initialize _cContext"); _color.setMirroringEnabled(false);
+	nRetVal = _depth.create(_device, openni::SENSOR_DEPTH); //CHECK_RC_(nRetVal, "Initialize _cContext");
+	_depth.setMirroringEnabled(false);
+	nRetVal = _color.create(_device, openni::SENSOR_COLOR); // CHECK_RC_(nRetVal, "Initialize _cContext"); 
+	_color.setMirroringEnabled(false);
 	_colorSensorInfo = _device.getSensorInfo(openni::SENSOR_COLOR);
 
 	if( setVideoMode(_uResolution) == STATUS_OK )
 	{
-		nRetVal = _depth.start(); CHECK_RC_(nRetVal, "Create depth video stream fail");
-		nRetVal = _color.start(); CHECK_RC_(nRetVal, "Create color video stream fail"); 
+		nRetVal = _depth.start(); //CHECK_RC_(nRetVal, "Create depth video stream fail");
+		nRetVal = _color.start(); //CHECK_RC_(nRetVal, "Create color video stream fail"); 
 	}
 
 	if (_depth.isValid() && _color.isValid())
@@ -218,35 +216,35 @@ void CVideoSourceKinect::initKinect()
 	}
 
 
-	PRINTSTR(" Done.");
+	cout << (" Done.\n") ;
 
 	return;
 }
 void CVideoSourceKinect::initRecorder(std::string& strPath_){
 	initKinect();
 	_nMode = RECORDING;
-	PRINTSTR("Initialize RGBD data recorder...");
+	cout << ("Initialize RGBD data recorder...\n");
 	_recorder.create(strPath_.c_str());
 	_recorder.attach( _depth );
 	_recorder.attach( _color );
 
 	_recorder.start();
-	PRINTSTR(" Done.");
+	cout << (" Done.\n");
 }
 void CVideoSourceKinect::initPlayer(std::string& strPathFileName_){
 	init();
 	_nMode = PLAYING_BACK;
 
-	PRINTSTR("Initialize OpenNI Player...");
+	cout << ("Initialize OpenNI Player...\n");
 	//inizialization 
 	Status nRetVal = openni::OpenNI::initialize();
 	printf("After initialization:\n%s\n", openni::OpenNI::getExtendedError());
-	nRetVal = _device.open(strPathFileName_.c_str());		CHECK_RC_(nRetVal, "Open oni file");
-	nRetVal = _depth.create(_device, openni::SENSOR_DEPTH); CHECK_RC_(nRetVal, "Initialize _cContext"); 
-	nRetVal = _color.create(_device, openni::SENSOR_COLOR); CHECK_RC_(nRetVal, "Initialize _cContext"); 
+	nRetVal = _device.open(strPathFileName_.c_str());		//CHECK_RC_(nRetVal, "Open oni file");
+	nRetVal = _depth.create(_device, openni::SENSOR_DEPTH); //CHECK_RC_(nRetVal, "Initialize _cContext"); 
+	nRetVal = _color.create(_device, openni::SENSOR_COLOR); //CHECK_RC_(nRetVal, "Initialize _cContext"); 
 
-	nRetVal = _depth.start(); CHECK_RC_(nRetVal, "Create depth video stream fail");
-	nRetVal = _color.start(); CHECK_RC_(nRetVal, "Create color video stream fail"); 
+	nRetVal = _depth.start(); //CHECK_RC_(nRetVal, "Create depth video stream fail");
+	nRetVal = _color.start(); //CHECK_RC_(nRetVal, "Create color video stream fail"); 
 
 	if (_depth.isValid() && _color.isValid())
 	{
@@ -280,7 +278,7 @@ void CVideoSourceKinect::initPlayer(std::string& strPathFileName_){
 		// Set Hole Filter
 		_device.setDepthColorSyncEnabled(TRUE);
 	}//if (_bUseNIRegistration)
-	PRINTSTR(" Done.");
+	cout << (" Done.\n");
 
 	return;
 }//initPlayer()
@@ -715,14 +713,14 @@ bool CVideoSourceKinect::loadCoefficient(int nResolution_, int size_, Mat* coeff
 	ostringstream volume_name;
 
 	volume_name << "..//data//" << _serial_number << "//coefficient_" << nResolution_ << ".nii.gz";
-
+		
 	nifti_image* ptr_nim = nifti_image_read(volume_name.str().c_str(), 1);
 
 	if (coeff_->type() == CV_32FC1) {
 		memcpy((void*)coeff_->data, ptr_nim->data, sizeof(float) * nCols * nRows * size_);
 	}
 
-	nifti_image_free(ptr_nim);
+	nifti_image_free(ptr_nim);	
 	return true;
 }
 
@@ -731,7 +729,7 @@ bool CVideoSourceKinect::loadLocation(vector<float>* pvLocations_)
 	pvLocations_->clear();
 	ostringstream locName;
 	locName << "..//data//" << _serial_number << "//RegularLocations.yml";
-	if (!boost::filesystem::exists(locName.str().c_str()))
+	if (!std::experimental::filesystem::exists(locName.str().c_str()))
 	{
 		return false;
 	}

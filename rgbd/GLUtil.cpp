@@ -29,16 +29,14 @@
 #include <cuda_gl_interop.h>
 #include <cuda_runtime_api.h>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-
+#include <vector>
+#include <memory>
 #include <opencv2/core.hpp>
 #include <opencv2/cudaarithm.hpp>
 #include <opencv2/core/cuda/common.hpp>
-#include <vector>
 #include <Eigen/Dense>
 #include <Eigen/Core>
-#include <se3.hpp>
+#include <sophus/se3.hpp>
 
 #include "OtherUtil.hpp"
 #include "Kinect.h"
@@ -50,8 +48,8 @@ namespace btl{	namespace gl_util
 	using namespace Eigen;
 	using namespace std;
 	
-	CGLUtil::CGLUtil(ushort uResolution_, ushort uPyrLevel_,btl::utility::tp_coordinate_convention eConvention_ /*= btl::utility::BTL_GL*/,const Eigen::Vector3f& eivCentroid_ /*= Eigen::Vector3f(1.5f,1.5f,0.3f)*/)
-		:_uResolution(uResolution_),_usPyrHeight(uPyrLevel_),_usLevel(0),_eConvention(eConvention_),_eivCentroid(eivCentroid_){
+	CGLUtil::CGLUtil(ushort uResolution_, ushort uPyrLevel_,const Eigen::Vector3f& eivCentroid_ /*= Eigen::Vector3f(1.5f,1.5f,0.3f)*/)
+		:_uResolution(uResolution_),_usPyrHeight(uPyrLevel_),_usLevel(0),_eivCentroid(eivCentroid_){
 			_dZoom = 0.; //for zooming
 			_dZoomLast = 1.;
 			_dScale = .1;
@@ -205,17 +203,17 @@ namespace btl{	namespace gl_util
 		{
 			switch(eError){
 			case GL_INVALID_ENUM:
-				PRINTSTR("GL_INVALID_ENUM");break;
+				cout << ("GL_INVALID_ENUM\n");break;
 			case GL_INVALID_VALUE:
-				PRINTSTR("GL_INVALID_VALUE");break;
+				cout << ("GL_INVALID_VALUE\n");break;
 			case GL_INVALID_OPERATION:
-				PRINTSTR("GL_INVALID_OPERATION");break;
+				cout << ("GL_INVALID_OPERATION\n");break;
 			case GL_STACK_OVERFLOW:
-				PRINTSTR("GL_STACK_OVERFLOW");break;
+				cout << ("GL_STACK_OVERFLOW\n");break;
 			case GL_STACK_UNDERFLOW:
-				PRINTSTR("GL_STACK_UNDERFLOW");break;
+				cout << ("GL_STACK_UNDERFLOW\n");break;
 			case GL_OUT_OF_MEMORY:
-				PRINTSTR("GL_OUT_OF_MEMORY");break;
+				cout << ("GL_OUT_OF_MEMORY\n");break;
 			}
 		}
 	}
@@ -236,9 +234,6 @@ namespace btl{	namespace gl_util
 			}
 			(*pTw_)(r) = -(*pTw_)(r); 
 		}
-		//PRINT(S);
-		//PRINT(*pRw_);
-		//PRINT(*pTw_);
 		return;
 	}
 	int CGLUtil::getLevel(int nCols_ ){
@@ -260,7 +255,7 @@ namespace btl{	namespace gl_util
 			return 5;
 		default:
 			cout << nCols_ << endl;
-			PRINTSTR("Failure - input resolution is not 640x480 or 320x240 or 160x120 or 80x60 or 40x30. ");
+			cout << ("Failure - input resolution is not 640x480 or 320x240 or 160x120 or 80x60 or 40x30. \n") ;
 			return -1;
 		}
 		return -1;
@@ -447,7 +442,6 @@ namespace btl{	namespace gl_util
 			_dX  = _dXLast + _nXMotion;
 			_dY  = _dYLast + _nYMotion;
 			_dZoom = _dZoomLast + (_nXMotion + _nYMotion)/200.;
-			//PRINT(_dZoom);
 		}
 
 		glutPostRedisplay();
@@ -507,36 +501,30 @@ namespace btl{	namespace gl_util
 			glDisable( GL_BLEND );
 			_dZoom += _dScale;
 			glutPostRedisplay();
-			//PRINT( _dZoom );
 			break;
 		case 'h':
 			//zoom out
 			glDisable( GL_BLEND );
 			_dZoom -= _dScale;
 			glutPostRedisplay();
-			//PRINT( _dZoom );
 			break;
 		case 'l':
 			_bEnableLighting = !_bEnableLighting;
 			glutPostRedisplay();
-			//PRINT( _bEnableLighting );
 			break;
 		case 'n':
 			_bRenderNormal = !_bRenderNormal;
 			glutPostRedisplay();
-			//PRINT( _bRenderNormal );
 			break;
 		case 'k':
 			_fSize += 0.05f;// range from 0.05 to 1 by step 0.05
 			_fSize = _fSize < 1 ? _fSize: 1;
 			glutPostRedisplay();
-			//PRINT( _fSize );
 			break;
 		case 'j':
 			_fSize -= 0.05f;
 			_fSize = _fSize > 0.05f? _fSize : 0.05f;
 			glutPostRedisplay();
-			//PRINT( _fSize );
 			break;
 		case '<':
 			_dYAngle += 1.0;
@@ -549,7 +537,6 @@ namespace btl{	namespace gl_util
 		case '9':
 			_usLevel = ++_usLevel%_usPyrHeight;
 			glutPostRedisplay();
-			//PRINT(_usPyrHeight);
 			break;
 		case '0'://reset camera location
 			setInitialPos();
@@ -784,12 +771,12 @@ namespace btl{	namespace gl_util
 		
 		//rotation
 		Eigen::Matrix3f eimRotation;
-		if( btl::utility::BTL_GL == _eConvention ){
+		//if( btl::utility::BTL_GL == _eConvention ){
 			eimRotation = Eigen::AngleAxisf(float(_dXAngle*M_PI/180.f), Eigen::Vector3f::UnitY())* Eigen::AngleAxisf(float(_dYAngle*M_PI/180.f), Eigen::Vector3f::UnitX());                         // 3. rotate horizontally
-		}//mouse x-movement is the rotation around y-axis
-		else if( btl::utility::BTL_CV == _eConvention )	{
-			eimRotation = Eigen::AngleAxisf(float(_dXAngle*M_PI/180.f), -Eigen::Vector3f::UnitY())* Eigen::AngleAxisf(float(_dYAngle*M_PI/180.f), Eigen::Vector3f::UnitX());                         // 3. rotate horizontally
-		}
+		//}//mouse x-movement is the rotation around y-axis
+		//else if( btl::utility::BTL_CV == _eConvention )	{
+			//eimRotation = Eigen::AngleAxisf(float(_dXAngle*M_PI/180.f), -Eigen::Vector3f::UnitY())* Eigen::AngleAxisf(float(_dYAngle*M_PI/180.f), Eigen::Vector3f::UnitX());                         // 3. rotate horizontally
+		//}
 		//translation
 		/*_dZoom = _dZoom < 0.1? 0.1: _dZoom;
 		_dZoom = _dZoom > 10? 10: _dZoom;*/

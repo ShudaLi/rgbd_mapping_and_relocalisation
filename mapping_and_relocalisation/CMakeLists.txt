@@ -10,11 +10,6 @@ find_package(Qt5OpenGL REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
 find_package(Qt5Xml REQUIRED)
-FIND_PACKAGE(Boost COMPONENTS system filesystem date_time chrono)
-IF (Boost_FOUND)
-    INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR})
-    ADD_DEFINITIONS( "-DHAS_BOOST" )
-ENDIF()
 
 QT5_WRAP_CPP(HEADERS_MOC ${HEADERS})
 
@@ -22,7 +17,6 @@ QT5_WRAP_CPP(HEADERS_MOC ${HEADERS})
     include_directories ( $ENV{QGLVIEWER_INC} )
 	include_directories ( $ENV{EIGEN_INC} )
 	include_directories ( $ENV{OPENNI2_INC} )
-    include_directories ( $ENV{BOOST_INC} ) 
     include_directories ( $ENV{FREEGLUT_INC} )
     include_directories ( $ENV{GLEW_INC} )
 	include_directories ( $ENV{CUDA_INC_PATH} )
@@ -30,7 +24,6 @@ QT5_WRAP_CPP(HEADERS_MOC ${HEADERS})
 
     link_directories ( $ENV{QGLVIEWER_LIB} )
 	link_directories ( $ENV{OPENNI2_LIB} )
-	link_directories ( $ENV{BOOST_LIB} )
 	link_directories ( $ENV{FREEGLUT_LIB} )
 	link_directories ( $ENV{GLEW_LIB} )
 	link_directories ( ${PROJECT_SOURCE_DIR}/lib )
@@ -42,11 +35,9 @@ if(WIN32)
         set(QGLVIEWER  optimized QGLViewer2  debug QGLViewerd2 )
 		set(ZLIB optimized zlib debug zlibd )	
 		set(EXTRA_LIBS ${RGBDLIB} ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} OpenNI2
-			${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_DATETIME_LIBRARY} 
 			freeglut GLU32  glew32 GLU32 opengl32 ${QGLVIEWER} ${QT_LIBRARIES} ${OpenCV_LIBS})
 elseif(UNIX)
 	include_directories ( ${PROJECT_SOURCE_DIR}/rgbd )
-
 	link_directories ( ${PROJECT_SOURCE_DIR}/lib )
 	set(RGBDLIB Rgbd)
 	set(FREEGLUTLIB ${GLUT_glut_LIBRARY})
@@ -56,7 +47,6 @@ elseif(UNIX)
 	set(ZLIB ${ZLIB_LIBRARY})
 	set(QGLVIEWER  QGLViewer-qt5 )
 	set(EXTRA_LIBS ${RGBDLIB} ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} OpenNI2
-		${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_SERIALIZATION_LIBRARY} 
         ${FREEGLUTLIB} ${GLLIB} ${GLEWLIB} ${QGLVIEWER} ${QT_LIBRARIES} ${OpenCV_LIBS})
 endif()
 

@@ -18,15 +18,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <numeric>
+#include <experimental/filesystem>
+#include <memory>
 
-#include <boost/lexical_cast.hpp>
-#include <boost/random.hpp>
-#include <boost/generator_iterator.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/filesystem.hpp>
-
-//#include <opencv2/core/utility.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/xfeatures2d/nonfree.hpp>
 #include <opencv2/xfeatures2d.hpp>
@@ -43,7 +38,7 @@
 #include <opencv2/cudaarithm.hpp>
 #include <OpenNI.h>
 #include "Kinect.h"
-#include <se3.hpp>
+#include <sophus/se3.hpp>
 #include "EigenUtil.hpp"
 #include "GLUtil.hpp"
 #include <map>
@@ -152,15 +147,15 @@ void CData4Viewer::init()
 	if( _bInitialized ) return;
 	GLenum eError = glewInit(); 
 	if (GLEW_OK != eError){
-		PRINTSTR("glewInit() error.");
-		PRINT( glewGetErrorString(eError) );
+		cout << ("glewInit() error.\n");
+		cout << ( glewGetErrorString(eError) ) << endl;
 	}
 	btl::gl_util::CGLUtil::initCuda();
 	btl::gl_util::CGLUtil::setCudaDeviceForGLInteroperation();//initialize before using any cuda component
 	loadFromYml();
-	boost::filesystem::remove_all(_result_folder.c_str());
-	boost::filesystem::path dir(_result_folder.c_str());
-	if(boost::filesystem::create_directories(dir)) { 
+	std::experimental::filesystem::remove_all(_result_folder.c_str());
+	std::experimental::filesystem::path dir(_result_folder.c_str());
+	if(std::experimental::filesystem::create_directories(dir)) {
 		std::cout << "Success" << "\n";
 	}
 	reset();
@@ -232,7 +227,7 @@ void CData4Viewer::reset(){
 		_dYAngle = _pGL->_dYAngle;
 	}
 	_pGL.reset();
-	_pGL.reset( new btl::gl_util::CGLUtil(_uResolution,_uPyrHeight,btl::utility::BTL_GL) );
+	_pGL.reset( new btl::gl_util::CGLUtil(_uResolution,_uPyrHeight) );
 
 	_pGL->_bDisplayCamera = _bDisplayImage;
 	_pGL->_bEnableLighting = _bLightOn;
@@ -311,7 +306,6 @@ void CData4Viewer::drawGlobalView()
 		//_pVirtualGlobalView->assignRTfromGL();
 		//_pCubicGridsMoved->gpuRaycast(&*_pVirtualGlobalView, true, _bCapture); //if capturing is on, fineCast is off
 		//_pVirtualGlobalView->gpuRender3DPts(_pGL.get(), 0);
-		//PRINT(*_pVirtualGlobalView->_acvmShrPtrPyrPts[0]);
 	}
 	
 	if (_bIsCurrFrameOn){
@@ -354,7 +348,6 @@ void CData4Viewer::drawGlobalView()
 		_pTracker->displayCameraPath();
 		_pTracker->displayCameraPathReloc();
 	}
-	//PRINTSTR("drawGlobalView");
 	return;
 }
 
@@ -391,7 +384,6 @@ void CData4Viewer::drawCameraView(qglviewer::Camera* pCamera_)
 		glLoadMatrixf(mv.data());
 		_pKinect->_pRGBCamera->renderCameraInLocal(_pVirtualCameraView->_depth_gray, _pGL.get(), false, NULL, 0.2f, true); //render in model coordinate
 	}
-	//PRINTSTR("drawCameraView");
 	return;	
 }
 
@@ -404,7 +396,6 @@ void CData4Viewer::drawRGBView()
 	Matrix4f mv = btl::utility::setModelViewGLfromPrj(tmp); //mv transform X_m to X_w i.e. model coordinate to world coordinate
 	glLoadMatrixf( mv.data() );
 	_pKinect->_pRGBCamera->renderCameraInLocal(*_pKinect->_pCurrFrame->_acvgmShrPtrPyrRGBs[_pGL->_usLevel],  _pGL.get(),false, NULL, 0.2f, true ); //render in model coordinate
-	//PRINTSTR("drawRGBView");
     return;
 }
 
@@ -440,7 +431,6 @@ void CData4Viewer::drawDepthView(qglviewer::Camera* pCamera_)
 		glLoadMatrixf(mv.data());
 		_pKinect->_pRGBCamera->renderCameraInLocal(_pKinect->_pCurrFrame->_depth_gray, _pGL.get(), false, NULL, 0.2f, true); //render in model coordinate
 	}
-	//PRINTSTR("drawDepthView");
 	return;
 }
 
@@ -451,9 +441,9 @@ void CData4Viewer::setAsPrevPos()
 
 void CData4Viewer::exportGlobalModel()
 {
-	PRINTSTR("Export global model...")
-	boost::filesystem::path dir(_global_model_folder.c_str());
-	if(boost::filesystem::create_directories(dir)) {
+	cout << ("Export global model...\n")
+	std::experimental::filesystem::path dir(_global_model_folder.c_str());
+	if(std::experimental::filesystem::create_directories(dir)) {
 		std::cout << "Success" << "\n";
 	}
 
@@ -461,13 +451,13 @@ void CData4Viewer::exportGlobalModel()
 	_pCubicGrids->storeNIFTI(_global_model_folder);
 	_pTracker->storeGlobalFeaturesAndCameraPoses(_global_model_folder);
 	exportRelativeGTworld2Userworld();
-	PRINTSTR("Done.");
+	cout << ("Done.\n");
 	return;
 }
 
 void CData4Viewer::exportRelativeGTworld2Userworld(){
-	boost::filesystem::path dir(_global_model_folder.c_str());
-	if (!boost::filesystem::create_directories(dir)) {
+	std::experimental::filesystem::path dir(_global_model_folder.c_str());
+	if (!std::experimental::filesystem::create_directories(dir)) {
 		std::cout << "Failure - create folder fails. " << _global_model_folder << " \n";
 	}
 	//store relative motion between GT and self-defined system.
@@ -509,7 +499,7 @@ void CData4Viewer::importRelativeGTworld2Userworld(){
 
 void CData4Viewer::importGlobalModel()
 {
-	PRINTSTR("Loading a global model...")
+	cout << ("Loading a global model...\n");
 	_pCubicGrids->loadNIFTI(_global_model_folder);
 	_pTracker->loadGlobalFeaturesAndCameraPoses(_global_model_folder);
 }

@@ -39,8 +39,6 @@
 #include "pcl/vector_math.hpp"
 #include <vector>
 #include "CudaLib.cuh"
-//#include "../KeyFrame.h"
-//#include <boost/shared_ptr.hpp>
 
 using namespace cv;
 using namespace cv::cuda;
@@ -76,8 +74,6 @@ void cudaDepth2Disparity( const cv::cuda::GpuMat& cvgmDepth_, cv::cuda::GpuMat* 
 __global__ void kernelInverse2(const cv::cuda::PtrStepSz<float> cvgmIn_, float fCutOffDistance_, float factor_, cv::cuda::PtrStepSz<float> cvgmOut_){
     const int nX = blockDim.x * blockIdx.x + threadIdx.x;
     const int nY = blockDim.y * blockIdx.y + threadIdx.y;
-	//if (nX <2)
-		//printf("nX %d, nY %d, out %f\n", nX, nY);
 	if (nX >= cvgmIn_.cols || nY >= cvgmIn_.rows) return;
 	float D = cvgmIn_.ptr(nY)[nX];
 	if (D > 0.01f && D < fCutOffDistance_){

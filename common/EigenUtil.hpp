@@ -180,9 +180,9 @@ T aoHorn ( const Eigen::Matrix<T,-1,-1,0,-1,-1> & eimXw_, const Eigen::Matrix<T,
 	// A is Ref B is Cur
 	// eimB_ = R * eimA_ + T;
 	// main references: http://www.mathworks.com/matlabcentral/fileexchange/22422-absolute-orientation
-	CHECK ( 	eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
-	CHECK ( 	eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
-	CHECK ( 	eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
+	//CHECK ( 	eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
+	//CHECK ( 	eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
+	//CHECK ( 	eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
 
 	//Compute the centroid of each point set
 
@@ -366,9 +366,9 @@ T aoHorn ( const Eigen::Matrix<T,-1,-1,0,-1,-1> & eimXw_, const Eigen::Matrix<T,
 	// A is Ref B is Cur
 	// eimB_ = R * eimA_ + T;
 	// main references: http://www.mathworks.com/matlabcentral/fileexchange/22422-absolute-orientation
-	CHECK ( 	eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
-	CHECK ( 	eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
-	CHECK ( 	eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
+	//CHECK ( 	eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
+	//CHECK ( 	eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
+	//CHECK ( 	eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
 
 	//Compute the centroid of each point set
 	Eigen::Matrix<T,3,1> eivCentroidA(0,0,0), eivCentroidB(0,0,0); //Matrix<float,3,1,0,3,1> = Vector3f
@@ -483,9 +483,9 @@ T aoArun ( const Eigen::Matrix<T,-1,-1,0,-1,-1> & eimXw_, const Eigen::Matrix<T,
 	// eimXc_ = R * eimXw_ + T; //R and t is defined in world and transform a point in world to local
 	// main references: http://www.mathworks.com/matlabcentral/fileexchange/22422-absolute-orientation
 	using namespace Eigen;
-	CHECK ( 	eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
-	CHECK ( 	eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
-	CHECK ( 	eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
+	//CHECK ( 	eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
+	//CHECK ( 	eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
+	//CHECK ( 	eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
 
 	//Compute the centroid of each point set
 	Eigen::Matrix<double, 3,1> eivCentroidW(0,0,0), eivCentroidC(0,0,0); //Matrix<float,3,1,0,3,1> = Vector3f
@@ -555,9 +555,9 @@ T aoRansac ( const Eigen::Matrix<T,-1,-1,0,-1,-1> & eimXw_, const Eigen::Matrix<
 	// main references: http://www.mathworks.com/matlabcentral/fileexchange/22422-absolute-orientation
 	using namespace Eigen;
 	using namespace cv;
-	CHECK (	eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
-	CHECK (	eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
-	CHECK (	eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
+	//CHECK (	eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
+	//CHECK (	eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
+	//CHECK (	eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
 
 	RandomElements<int> re( (int)eimXw_.cols() );
 	const int K = 3;
@@ -598,7 +598,7 @@ T aoRansac ( const Eigen::Matrix<T,-1,-1,0,-1,-1> & eimXw_, const Eigen::Matrix<
 	//collect inliers
 	////////////////////////////////////////////////////////////////
 	int best_idx = most.at<int>(0,0);
-	PRINT( all_votes.at<int>( 0,best_idx) );
+	cout << ( all_votes.at<int>( 0,best_idx) ) << endl;
 	vector<int>& v_inlier_idx = _v_v_inlier_idx[best_idx];
 	pInliers_->create(1,(int)v_inlier_idx.size(),CV_32SC1); 
 	Matrix<T,-1,-1,0,-1,-1> eimX_world_selected( 3,v_inlier_idx.size() ),    eimX_cam_selected(3,v_inlier_idx.size());
@@ -631,9 +631,9 @@ Eigen::Matrix<T,2,1> absoluteOrientationWithNormal ( const Eigen::Matrix<T,-1,-1
 	// A is Ref B is Cur
 	// eimB_ = R * eimA_ + T;
 	// main references: http://www.mathworks.com/matlabcentral/fileexchange/22422-absolute-orientation
-	CHECK ( 	eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
-	CHECK ( 	eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
-	CHECK ( 	eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
+	//CHECK ( 	eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
+	//CHECK ( 	eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
+	//CHECK ( 	eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
 
 	//Compute the centroid of each point set
 	Eigen::Matrix<T,3,1> eivCentroidA(0,0,0), eivCentroidB(0,0,0); //Matrix<float,3,1,0,3,1> = Vector3f
@@ -790,9 +790,9 @@ Eigen::Matrix<T,2,1> absoluteOrientationWithNormalnMainDirection ( const Eigen::
 	// A is Ref B is Cur
 	// eimB_ = R * eimA_ + T;
 	// main references: http://www.mathworks.com/matlabcentral/fileexchange/22422-absolute-orientation
-	CHECK ( 	eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
-	CHECK ( 	eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
-	CHECK ( 	eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
+	//CHECK ( 	eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
+	//CHECK ( 	eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
+	//CHECK ( 	eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
 
 	//Compute the centroid of each point set
 	Eigen::Matrix<T,3,1> eivCentroidA(0,0,0), eivCentroidB(0,0,0); //Matrix<float,3,1,0,3,1> = Vector3f
@@ -1022,9 +1022,9 @@ Eigen::Matrix<T,2,1> aoWithNormalRansac ( const Eigen::Matrix<T,-1,-1,0,-1,-1>& 
 	// main references: http://www.mathworks.com/matlabcentral/fileexchange/22422-absolute-orientation
 	using namespace Eigen;
 	using namespace cv;
-	CHECK ( 	eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
-	CHECK ( 	eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
-	CHECK ( 	eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
+	//CHECK ( 	eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
+	//CHECK ( 	eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
+	//CHECK ( 	eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
 
 	RandomElements<int> re( (int)eimXw_.cols() );
 	const int K = 2;
@@ -1104,9 +1104,9 @@ Eigen::Matrix<T,2,1> aoWithNormalWith2dConstraintRansac ( const Eigen::Matrix<T,
 	// main references: http://www.mathworks.com/matlabcentral/fileexchange/22422-absolute-orientation
 	using namespace Eigen;
 	using namespace cv;
-	CHECK ( 	eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
-	CHECK ( 	eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
-	CHECK ( 	eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
+	//CHECK ( 	eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
+	//CHECK ( 	eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
+	//CHECK ( 	eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
 
 	RandomElements<int> re( (int)eimXw_.cols() );
 	const int K = 2;
@@ -1217,9 +1217,9 @@ Eigen::Matrix<T,2,1> aoWithNormaln2dConstraintRansac2( const Eigen::Matrix<T,-1,
 	// main references: http://www.mathworks.com/matlabcentral/fileexchange/22422-absolute-orientation
 	using namespace Eigen;
 	using namespace cv;
-	CHECK ( 	eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
-	CHECK ( 	eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
-	CHECK ( 	eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
+	//CHECK ( 	eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
+	//CHECK ( 	eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
+	//CHECK ( 	eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
 
 	RandomElements<int> re( (int)eimXw_.cols() );
 	const int K = 2;
@@ -1379,9 +1379,9 @@ Eigen::Matrix<T,2,1> aoWithNormalMainDirectionWith2dConstraintRansac ( const Eig
 	// main references: http://www.mathworks.com/matlabcentral/fileexchange/22422-absolute-orientation
 	using namespace Eigen;
 	using namespace cv;
-	CHECK ( eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
-	CHECK ( eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
-	CHECK ( eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
+	//CHECK ( eimXw_.rows() == 3, " absoluteOrientation() requires the input matrix A_ is a 3 x N matrix. " );
+	//CHECK ( eimXc_.rows() == 3, " absoluteOrientation() requires the input matrix B_ is a 3 x N matrix. " );
+	//CHECK ( eimXw_.cols() == eimXc_.cols(), " absoluteOrientation() requires the columns of input matrix A_ and B_ are equal. " );
 
 	T md_thre = angle_thre_*20;
 

@@ -59,6 +59,7 @@ find_package(Qt5Core REQUIRED  PATHS $ENV{QtCore})
 find_package(Qt5Gui REQUIRED  PATHS $ENV{QtGui})
 find_package(Qt5Xml REQUIRED  PATHS $ENV{QtXml})
 include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/sophus/include/ )
+include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/ )
 #Notice that the headers only include the headers that needs to be processed by moc.
 QT5_WRAP_CPP(HEADERS_MOC ${HEADERS})
 
@@ -92,7 +93,7 @@ if( UNIX )
 	link_directories ( $ENV{ZLIB_LIB} )
 	link_directories ( $ENV{NIFTI_LIB} )
 	# link_directories ( $ENV{OPENNI2_LIB} )
-	link_directories ( $ENV{BOOST_LIB} )
+
 	link_directories ( $ENV{FREEGLUT_LIB} )
 	link_directories ( $ENV{GLEW_LIB} )
 	link_directories ( ${PROJECT_SOURCE_DIR}/lib )
@@ -100,9 +101,7 @@ elseif( WIN32 )
 	message(STATUS "platform: Windows")
 
 	include_directories ( $ENV{OPENCV_NEW}/include )
-	include_directories ( $ENV{EIGEN_INC} )
 	# include_directories ( $ENV{OPENNI2_INC} )
-    include_directories ( $ENV{BOOST_INC} )
     include_directories ( $ENV{FREEGLUT_INC} )
     include_directories ( $ENV{GLEW_INC} )
 	include_directories ( $ENV{NIFTI_INC} )
@@ -114,7 +113,6 @@ elseif( WIN32 )
 	link_directories ( $ENV{ZLIB_LIB} )
 	link_directories ( $ENV{NIFTI_LIB} )
 	# link_directories ( $ENV{OPENNI2_LIB} )
-	link_directories ( $ENV{BOOST_LIB} )
 	link_directories ( $ENV{FREEGLUT_LIB} )
 	link_directories ( $ENV{GLEW_LIB} )
 	link_directories ( ${PROJECT_SOURCE_DIR}/lib )
@@ -177,7 +175,7 @@ elseif(UNIX)
 	set(NIFTIIOLIB niftiio )
 endif()
 
-	target_link_libraries( Rgbd ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${Boost_DATE_TIME_LIBRARY} ${Boost_SERIALIZATION_LIBRARY} ${Boost_THREAD_LIBRARY} ${Boost_CHRONO_LIBRARY}
+	target_link_libraries( Rgbd 
 	opencv_core opencv_features2d opencv_xfeatures2d opencv_imgproc opencv_cudaimgproc opencv_cudawarping opencv_cudafeatures2d opencv_cudaarithm
     ${FREEGLUTLIB} ${GLLIB} ${GLEWLIB} ${CUDALIB} ${OPENNI2LIB} ${NIFTIIOLIB} ${ZNZLIB} ${ZLIB} ) 
 

@@ -32,8 +32,7 @@ namespace btl{ namespace image {
 struct DLL_EXPORT SCamera
 {
 	//type
-	typedef boost::shared_ptr<SCamera> tp_shared_ptr;
-	typedef boost::shared_ptr<SCamera> tp_scoped_ptr;
+	typedef std::shared_ptr<SCamera> tp_shared_ptr;
 	typedef SCamera* tp_ptr;
 	enum tp_camera {CAMERA_RGB, CAMERA_IR};
 

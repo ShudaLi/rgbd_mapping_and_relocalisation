@@ -288,8 +288,7 @@ Eigen::Matrix< T, ROW, COL >& operator << ( Eigen::Matrix< T, ROW, COL >& eiVec_
 {
     if ( ROW != cvVec_.rows || COL != cvVec_.cols )
     {
-        CError cE;
-        cE << CErrorInfo ( " cv::Mat dimension is inconsistent with Vector3d . \n" );
+        std::exception cE;
         //PRINT( cvVec_.cols ); PRINT( cvVec_.rows );
         throw cE;
     }
@@ -329,8 +328,9 @@ cv::Mat_< T >& operator << ( cv::Mat_< T >& cvMat_,  const  std::vector< T >& vV
 
 	if ( vVec_.empty() )
 	{
-		CError cE;
-		cE << CErrorInfo ( " the input std::vector<> cannot be empty.\n" );
+		//CError cE;
+		std::exception cE;
+		//cE << CErrorInfo(" the input std::vector<> cannot be empty.\n");
 		throw cE;
 	}
 
@@ -372,8 +372,8 @@ cv::Mat_< T >& operator << ( cv::Mat_< T >& cvMat_,  const  std::vector< std::ve
 
     if ( vvVec_.empty() || vvVec_[0].empty() )
     {
-        CError cE;
-        cE << CErrorInfo ( " the input std::vector<> cannot be empty.\n" );
+		std::exception cE;
+        //cE << CErrorInfo ( " the input std::vector<> cannot be empty.\n" );
         throw cE;
     }
 
@@ -635,8 +635,8 @@ cv::Mat& operator << ( cv::Mat& cvVec_, const Eigen::Matrix< T, ROW, COL >& eiVe
 template < class T >
 cv::Mat_< T >& operator << ( cv::Mat_< T >& cppM_, const CvMat& cM_ )
 {
-    CHECK ( cppM_.type() == CV_MAT_TYPE ( cM_.type ) , "operator CvMat << cv::Mat_: the type of cv::Mat_ and CvMat is inconsistent. \n" );
-    CHECK ( CV_IS_MAT ( &cM_ ),                       "operator CvMat << cv::Mat_: the data of CvMat must be pre-allocated. \n" );
+    //CHECK ( cppM_.type() == CV_MAT_TYPE ( cM_.type ) , "operator CvMat << cv::Mat_: the type of cv::Mat_ and CvMat is inconsistent. \n" );
+    //CHECK ( CV_IS_MAT ( &cM_ ),                       "operator CvMat << cv::Mat_: the data of CvMat must be pre-allocated. \n" );
 
     cppM_.create ( cM_.rows, cM_.cols );
 
@@ -653,10 +653,10 @@ cv::Mat_< T >& operator << ( cv::Mat_< T >& cppM_, const CvMat& cM_ )
 template < class T >
 CvMat& operator << ( CvMat& cM_, const cv::Mat_< T >& cppM_ )
 {
-    CHECK ( cppM_.type() == CV_MAT_TYPE ( cM_.type ) , "operator CvMat << cv::Mat_: the type of cv::Mat_ and CvMat is inconsistent. \n" );
-    CHECK ( CV_IS_MAT ( &cM_ ),                       "operator CvMat << cv::Mat_: the data of CvMat is not allocated. \n" );
-    CHECK ( cppM_.rows == cM_.rows ,                 "operator CvMat << cv::Mat_: the # of rows of cv::Mat_ and CvMat is inconsistent. \n" );
-    CHECK ( cppM_.cols == cM_.cols,                  "operator CvMat << cv::Mat_: the # of cols of cv::Mat_ and CvMat is inconsistent. \n" );
+    //CHECK ( cppM_.type() == CV_MAT_TYPE ( cM_.type ) , "operator CvMat << cv::Mat_: the type of cv::Mat_ and CvMat is inconsistent. \n" );
+    //CHECK ( CV_IS_MAT ( &cM_ ),                       "operator CvMat << cv::Mat_: the data of CvMat is not allocated. \n" );
+    //CHECK ( cppM_.rows == cM_.rows ,                 "operator CvMat << cv::Mat_: the # of rows of cv::Mat_ and CvMat is inconsistent. \n" );
+    //CHECK ( cppM_.cols == cM_.cols,                  "operator CvMat << cv::Mat_: the # of cols of cv::Mat_ and CvMat is inconsistent. \n" );
 
 
     for ( int r = 0; r < cppM_.rows; r++ )

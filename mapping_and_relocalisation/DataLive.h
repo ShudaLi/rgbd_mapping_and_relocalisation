@@ -44,7 +44,7 @@ using namespace Eigen;
 class CDataLive: public CData4Viewer
 {
 public:
-	typedef boost::shared_ptr<CDataLive> tp_shared_ptr;
+	typedef std::shared_ptr<CDataLive> tp_shared_ptr;
 
 	CDataLive();
 	virtual ~CDataLive(){ ; }

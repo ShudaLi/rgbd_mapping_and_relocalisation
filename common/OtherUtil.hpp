@@ -34,8 +34,8 @@
 
 //#include <Eigen/Dense>
 
-#include <boost/exception/all.hpp>
-#include <boost/preprocessor/stringize.hpp>
+//#include <boost/exception/all.hpp>
+//#include <boost/preprocessor/stringize.hpp>
 
 #include <opencv2/core.hpp>
 namespace btl
@@ -45,30 +45,29 @@ namespace utility
 
 #define SMALL 1e-50 // a small value
 #define BTL_DOUBLE_MAX 10e20
-	enum tp_coordinate_convention { BTL_GL, BTL_CV };
 	//exception based on boost
-	typedef boost::error_info<struct tag_my_info, std::string> CErrorInfo;
-	struct CError: virtual boost::exception, virtual std::exception { };
-#define THROW(what)\
-	{\
-	btl::utility::CError cE;\
-	cE << btl::utility::CErrorInfo ( what );\
-	throw cE;\
-	}
-	//exception from btl2
-	struct CException : public std::runtime_error
-	{
-		CException(const std::string& str) : std::runtime_error(str) {}
-	};
-#define BTL_THROW(what) {throw btl::utility::CException(what);}
-	//ASSERT condition to be true; other wise throw
-#define CHECK( AssertCondition_, Otherwise_) \
-	if ((AssertCondition_) != true)\
-	BTL_THROW( Otherwise_ );
-	//THROW( Otherwise_ );
-	//if condition happen then throw
-#define BTL_ERROR( ErrorCondition_, ErrorMessage_ ) CHECK( !(ErrorCondition_), ErrorMessage_) 
-#define BTL_ASSERT CHECK
+	//typedef boost::error_info<struct tag_my_info, std::string> CErrorInfo;
+//	struct CError: virtual std::exception { };
+//#define THROW(what)\
+//	{\
+//	btl::utility::CError cE;\
+//	cE << btl::utility::CErrorInfo ( what );\
+//	throw cE;\
+//	}
+//	//exception from btl2
+//	struct CException : public std::runtime_error
+//	{
+//		CException(const std::string& str) : std::runtime_error(str) {}
+//	};
+//#define BTL_THROW(what) {throw btl::utility::CException(what);}
+//	//ASSERT condition to be true; other wise throw
+//#define CHECK( AssertCondition_, Otherwise_) \
+//	if ((AssertCondition_) != true)\
+//	BTL_THROW( Otherwise_ );
+//	//THROW( Otherwise_ );
+//	//if condition happen then throw
+//#define BTL_ERROR( ErrorCondition_, ErrorMessage_ ) CHECK( !(ErrorCondition_), ErrorMessage_) 
+//#define BTL_ASSERT CHECK
 // for print
 template <class T>
 std::ostream& operator << ( std::ostream& os, const std::vector< T > & v )
@@ -84,19 +83,19 @@ std::ostream& operator << ( std::ostream& os, const std::vector< T > & v )
 	return os;
 }
 
-template <class T1, class T2>
-std::ostream& operator << ( std::ostream& os, const std::map< T1, T2 > & mp )
-{
-    os << "[";
-
-    for ( typename std::map< T1, T2 >::const_iterator constItr = mp.begin(); constItr != mp.end(); ++constItr )
-    {
-        os << " " << ( *constItr ).first << ": " << ( *constItr ).second << " ";
-    }
-
-    os << "]";
-    return os;
-}
+//template <class T1, class T2>
+//std::ostream& operator << ( std::ostream& os, const std::map< T1, T2 > & mp )
+//{
+//    os << "[";
+//
+//    for ( typename std::map< T1, T2 >::const_iterator constItr = mp.begin(); constItr != mp.end(); ++constItr )
+//    {
+//        os << " " << ( *constItr ).first << ": " << ( *constItr ).second << " ";
+//    }
+//
+//    os << "]";
+//    return os;
+//}
 
 template <class T>
 std::ostream& operator << ( std::ostream& os, const std::list< T >& l_ )

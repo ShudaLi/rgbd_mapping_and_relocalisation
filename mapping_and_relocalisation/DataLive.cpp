@@ -17,13 +17,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
-
-#include <boost/lexical_cast.hpp>
-#include <boost/random.hpp>
-#include <boost/generator_iterator.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/filesystem.hpp>
+#include <numeric>
+#include <memory>
 
 //#include <opencv2/core/utility.hpp>
 #include <opencv2/features2d.hpp>
@@ -40,7 +35,7 @@
 #include <opencv2/cudaarithm.hpp>
 #include <OpenNI.h>
 #include "Kinect.h"
-#include <se3.hpp>
+#include <sophus/se3.hpp>
 #include "EigenUtil.hpp"
 #include "GLUtil.hpp"
 #include "pcl/internal.h"
@@ -244,7 +239,6 @@ void CDataLive::updatePF(){
 			_pTracker->tracking(&*_pKinect->_pCurrFrame);
 			//if (true) storeResultPose();
 		}
-		//PRINTSTR("after track()");
 	}//if( _bCapture )
 	return;
 }

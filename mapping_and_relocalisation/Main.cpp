@@ -12,13 +12,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
-
-#include <boost/lexical_cast.hpp>
-#include <boost/random.hpp>
-#include <boost/generator_iterator.hpp>
-#include <boost/scoped_ptr.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-
+#include <numeric>
+#include <memory>
 #include "Utility.hpp"
 
 //camera calibration from a sequence of images
@@ -34,7 +29,7 @@
 #include <OpenNI.h>
 
 #include "Kinect.h"
-#include <se3.hpp>
+#include <sophus/se3.hpp>
 #include "EigenUtil.hpp"
 #include "GLUtil.hpp"
 #include <map>
@@ -81,18 +76,8 @@ int main(int argc, char** argv)
   hSplit->setWindowTitle("Kinect Multi-view");
 #endif
 
-  try{
-	  // Make the viewer window visible on screen.
-	  hSplit->show();
-	  // Run main loop.
-	  return application.exec();
-  }
-  catch ( btl::utility::CError& e )  {
-	  if ( std::string const* mi = boost::get_error_info< btl::utility::CErrorInfo > ( e ) ) {
-		  std::cerr << "Error Info: " << *mi << std::endl;
-	  }
-  }
-  catch ( std::runtime_error& e ){
-	  PRINTSTR( e.what() );
-  }
+	// Make the viewer window visible on screen.
+	hSplit->show();
+	// Run main loop.
+	return application.exec();
 }
