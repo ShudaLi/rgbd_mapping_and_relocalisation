@@ -14,6 +14,7 @@
 #include <vector>
 #include <numeric>
 #include <memory>
+#include <map>
 #include "Utility.hpp"
 
 //camera calibration from a sequence of images
@@ -32,7 +33,6 @@
 #include <sophus/se3.hpp>
 #include "EigenUtil.hpp"
 #include "GLUtil.hpp"
-#include <map>
 #include "Camera.h"
 #include "RGBDFrame.h"
 #include "VideoSourceKinect.hpp"
