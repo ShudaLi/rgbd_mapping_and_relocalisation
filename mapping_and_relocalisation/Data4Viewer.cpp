@@ -441,7 +441,7 @@ void CData4Viewer::setAsPrevPos()
 
 void CData4Viewer::exportGlobalModel()
 {
-	cout << ("Export global model...\n")
+	cout << ("Export global model...\n");
 	std::experimental::filesystem::path dir(_global_model_folder.c_str());
 	if(std::experimental::filesystem::create_directories(dir)) {
 		std::cout << "Success" << "\n";

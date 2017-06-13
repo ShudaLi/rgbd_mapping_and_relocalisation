@@ -141,7 +141,7 @@ void CDataLive::reset(){
 		_dYAngle = _pGL->_dYAngle;
 	}
 	_pGL.reset();
-	_pGL.reset( new btl::gl_util::CGLUtil(_uResolution,_uPyrHeight,btl::utility::BTL_GL) );
+	_pGL.reset( new btl::gl_util::CGLUtil(_uResolution,_uPyrHeight) );
 
 	_pGL->_bDisplayCamera = _bDisplayImage;
 	_pGL->_bEnableLighting = _bLightOn;
