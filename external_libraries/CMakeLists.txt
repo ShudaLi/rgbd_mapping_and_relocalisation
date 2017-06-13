@@ -1,3 +1,3 @@
 add_subdirectory(zlib)
-#add_subdirectory(nifit)
+add_subdirectory(nifticlib)
 
