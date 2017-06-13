@@ -1,11 +1,40 @@
-cmake_minimum_required (VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
-if(COMMAND cmake_policy)
+IF(COMMAND cmake_policy)
   cmake_policy(SET CMP0043 NEW)
   cmake_policy(SET CMP0020 NEW)
-endif()
+ENDIF()
 
-project (Btl)
+PROJECT (RgbdMappingAndRelocalisation)
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+# - Locates OpenNI
+	IF (UNIX)
+		set(OPEN_NI_ROOT "/usr/local" CACHE FILEPATH "Root directory of OpenNI2")
+	ELSEIF(MSVC)
+		set(OPEN_NI_ROOT "$ENV{OPENNI2_INC}/.." CACHE FILEPATH "Root directory of OpenNI2")
+	ENDIF()
+	# Finally the library itself
+	find_library(OpenNI_LIBRARY
+	NAMES OpenNI
+	PATHS "${OPEN_NI_ROOT}/Lib" "C:/Program Files (x86)/OpenNI/Lib" "C:/Program Files/OpenNI/Lib" "$ENV{OPENNI2_LIB}" ${CMAKE_LIB_PATH}
+	)
+
+	find_path(OpenNI_INCLUDE_DIR OpenNI.h PATH "${OPEN_NI_ROOT}/Include")
+
+	find_library(OpenNI_LIBRARY OpenNI2 PATH "${OPEN_NI_ROOT}/Bin/x64-Release/")
+
+	# handle the QUIETLY and REQUIRED arguments and set JPEG_FOUND to TRUE if
+	# all listed variables are TRUE
+	#include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+	# include(${CMAKE_MODULE_PATH}/FindPackageHandleStandardArgs.cmake)
+	# find_package_handle_standard_args(OpenNI DEFAULT_MSG OpenNI_LIBRARY OpenNI_INCLUDE_DIR)
+
+	if(OPENNI_FOUND)
+	  set(OpenNI_LIBRARIES ${OpenNI_LIBRARY})
+	endif()
+
+	mark_as_advanced(OpenNI_LIBRARY OpenNI_INCLUDE_DIR)
+
 
 find_package( OpenCV REQUIRED PATHS $ENV{OPENCV_NEW} NO_DEFAULT_PATH COMPONENTS core imgcodecs features2d  videoio highgui video calib3d cudaarithm )
 
@@ -29,7 +58,7 @@ find_package(Qt5OpenGL REQUIRED PATHS $ENV{QtOpenGL})
 find_package(Qt5Core REQUIRED  PATHS $ENV{QtCore})
 find_package(Qt5Gui REQUIRED  PATHS $ENV{QtGui})
 find_package(Qt5Xml REQUIRED  PATHS $ENV{QtXml})
-
+include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/sophus/include/ )
 #Notice that the headers only include the headers that needs to be processed by moc.
 QT5_WRAP_CPP(HEADERS_MOC ${HEADERS})
 
@@ -53,8 +82,7 @@ if( UNIX )
 	find_package(GLEW REQUIRED)
 	find_package(ZLIB REQUIRED)
 
-	include_directories ( $ENV{SOPHUS_INC} )
-	include_directories ( $ENV{OPENNI2_INC} )
+	# include_directories ( $ENV{OPENNI2_INC} )
 	include_directories ( $ENV{NIFTI_INC} )
 	include_directories ( $ENV{NIFTI_INC}/nifti )
 
@@ -63,7 +91,7 @@ if( UNIX )
 
 	link_directories ( $ENV{ZLIB_LIB} )
 	link_directories ( $ENV{NIFTI_LIB} )
-	link_directories ( $ENV{OPENNI2_LIB} )
+	# link_directories ( $ENV{OPENNI2_LIB} )
 	link_directories ( $ENV{BOOST_LIB} )
 	link_directories ( $ENV{FREEGLUT_LIB} )
 	link_directories ( $ENV{GLEW_LIB} )
@@ -73,8 +101,7 @@ elseif( WIN32 )
 
 	include_directories ( $ENV{OPENCV_NEW}/include )
 	include_directories ( $ENV{EIGEN_INC} )
-	include_directories ( $ENV{SOPHUS_INC} )
-	include_directories ( $ENV{OPENNI2_INC} )
+	# include_directories ( $ENV{OPENNI2_INC} )
     include_directories ( $ENV{BOOST_INC} )
     include_directories ( $ENV{FREEGLUT_INC} )
     include_directories ( $ENV{GLEW_INC} )
@@ -86,7 +113,7 @@ elseif( WIN32 )
 
 	link_directories ( $ENV{ZLIB_LIB} )
 	link_directories ( $ENV{NIFTI_LIB} )
-	link_directories ( $ENV{OPENNI2_LIB} )
+	# link_directories ( $ENV{OPENNI2_LIB} )
 	link_directories ( $ENV{BOOST_LIB} )
 	link_directories ( $ENV{FREEGLUT_LIB} )
 	link_directories ( $ENV{GLEW_LIB} )
