@@ -153,11 +153,14 @@ void CVideoSourceKinect::initKinect()
 	//inizialization 
 	Status nRetVal = openni::OpenNI::initialize();
 	printf("After initialization:\n%s\n", openni::OpenNI::getExtendedError());
-	nRetVal = _device.open(openni::ANY_DEVICE);			//CHECK_RC_(nRetVal, "Initialize _cContext"); 
+	nRetVal = _device.open(openni::ANY_DEVICE);			
+	if (nRetVal != STATUS_OK) cout << "Initialize _cContext" << endl;
 	
-	nRetVal = _depth.create(_device, openni::SENSOR_DEPTH); //CHECK_RC_(nRetVal, "Initialize _cContext");
+	nRetVal = _depth.create(_device, openni::SENSOR_DEPTH); 
+	if (nRetVal != STATUS_OK) cout << "Initialize _cContext" << endl;
 	_depth.setMirroringEnabled(false);
-	nRetVal = _color.create(_device, openni::SENSOR_COLOR); // CHECK_RC_(nRetVal, "Initialize _cContext"); 
+	nRetVal = _color.create(_device, openni::SENSOR_COLOR); 
+	if (nRetVal != STATUS_OK) cout << "Initialize _cContext" << endl;
 	_color.setMirroringEnabled(false);
 	_colorSensorInfo = _device.getSensorInfo(openni::SENSOR_COLOR);
 
@@ -284,34 +287,6 @@ void CVideoSourceKinect::initPlayer(std::string& strPathFileName_){
 
 void CVideoSourceKinect::importYML()
 {
-	// create and open a character archive for output
-#if __linux__
-	cv::FileStorage cFSRead( "../data/xtion_intrinsics.yml", cv::FileStorage::READ );
-#elif _WIN32
-	cv::FileStorage cFSRead ( "..\\data\\xtion_intrinsics.yml", cv::FileStorage::READ );
-#endif
-	cv::Mat cvmRelativeRotation,cvmRelativeTranslation;
-	cFSRead ["cvmRelativeRotation"] >> cvmRelativeRotation;
-	cFSRead ["cvmRelativeTranslation"] >> cvmRelativeTranslation;
-	cFSRead.release();
-
-	//prepare camera parameters
-	cv::Mat  mRTrans = cvmRelativeRotation.t();
-	cv::Mat vRT = mRTrans * cvmRelativeTranslation;
-
-	_aR[0] = (float)mRTrans.at<double> ( 0, 0 );
-	_aR[1] = (float)mRTrans.at<double> ( 0, 1 );
-	_aR[2] = (float)mRTrans.at<double> ( 0, 2 );
-	_aR[3] = (float)mRTrans.at<double> ( 1, 0 );
-	_aR[4] = (float)mRTrans.at<double> ( 1, 1 );
-	_aR[5] = (float)mRTrans.at<double> ( 1, 2 );
-	_aR[6] = (float)mRTrans.at<double> ( 2, 0 );
-	_aR[7] = (float)mRTrans.at<double> ( 2, 1 );
-	_aR[8] = (float)mRTrans.at<double> ( 2, 2 );
-
-	_aRT[0] = (float)vRT.at<double> ( 0 );
-	_aRT[1] = (float)vRT.at<double> ( 1 );
-	_aRT[2] = (float)vRT.at<double> ( 2 );
 }
 
 bool CVideoSourceKinect::getNextFrame(int* pnStatus_){
