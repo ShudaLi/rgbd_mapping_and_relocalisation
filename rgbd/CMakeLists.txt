@@ -23,6 +23,8 @@ if( UNIX )
 	include_directories ( ${PROJECT_SOURCE_DIR}/common )
 	include_directories ( ${PROJECT_SOURCE_DIR}/rgbd )
 	include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/ )
+	include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/nifticlib/niftilib/ )
+	include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/nifticlib/znzlib/ )
 elseif( WIN32 )
 	message(STATUS "platform: Windows")
 
@@ -33,6 +35,8 @@ elseif( WIN32 )
 	include_directories ( ${PROJECT_SOURCE_DIR}/common )
 	include_directories ( ${PROJECT_SOURCE_DIR}/rgbd )
 	include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/ )
+	include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/nifticlib/niftilib/ )
+	include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/nifticlib/znzlib/ )
 endif()
 
 
@@ -67,17 +71,16 @@ file(GLOB KINFU_CUDA_SOURCES "kinfu/[a-zA-Z]*.cu")
 message(STATUS "cuda source names: ${KINFU_CUDA_SOURCES}")
 
 cuda_add_library( Rgbd ${RGBD_HEADERS} ${OTHER_HEADERS} ${RGBD_SOURCES} ${RGBD_CUDA_HEADERS} ${RGBD_CUDA_SOURCES} ${KINFU_HEADERS} ${KINFU_SOURCES} ${KINFU_CUDA_HEADERS} ${KINFU_CUDA_SOURCES})
-target_link_libraries( Rgbd ) 
 
-if(MSVC)
-	set_target_properties(Rgbd PROPERTIES
-		DEBUG_POSTFIX "${LIB_TARGET_SUFFIX}d"
-		RELEASE_POSTFIX "${LIB_TARGET_SUFFIX}"
-		MINSIZEREL_POSTFIX "${LIB_TARGET_SUFFIX}"
-		RELWITHDEBINFO_POSTFIX "${LIB_TARGET_SUFFIX}"
-	)
-endif()
-install( TARGETS Rgbd DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/../" )
+#if(MSVC)
+#	set_target_properties(Rgbd PROPERTIES
+#		DEBUG_POSTFIX "${LIB_TARGET_SUFFIX}d"
+#		RELEASE_POSTFIX "${LIB_TARGET_SUFFIX}"
+#		MINSIZEREL_POSTFIX "${LIB_TARGET_SUFFIX}"
+#		RELWITHDEBINFO_POSTFIX "${LIB_TARGET_SUFFIX}"
+#	)
+#endif()
+#install( TARGETS Rgbd DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/../" )
 
 
 

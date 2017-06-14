@@ -34,7 +34,7 @@
 #include <numeric>
 #include <experimental/filesystem>
 //nifti
-#include <nifti/nifti1_io.h>   /* directly include I/O library functions */
+#include <nifti1_io.h>   /* directly include I/O library functions */
 //stl
 #ifdef __gnu_linux__
 #include <sys/types.h>
@@ -64,7 +64,7 @@
 #include <Eigen/Core>
 #include <sophus/se3.hpp>
 //nifti
-#include <nifti/nifti1_io.h>
+#include <nifti1_io.h>
 #define MIN_HEADER_SIZE 348
 #define NII_HEADER_SIZE 352
 

@@ -40,7 +40,7 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 //nifti
-#include <nifti/nifti1_io.h>   /* directly include I/O library functions */
+#include <nifti1_io.h>   /* directly include I/O library functions */
 #include <experimental/filesystem>
 //eigen
 #include <Eigen/Core>
