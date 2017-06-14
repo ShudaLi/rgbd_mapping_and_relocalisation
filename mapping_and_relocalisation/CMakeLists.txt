@@ -8,6 +8,9 @@ project (MappingAndRelocalisation)
 find_package(CUDA)
 include(FindCUDA)
 
+find_package( OpenCV REQUIRED PATHS COMPONENTS core imgcodecs features2d  videoio highgui video calib3d cudaarithm )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+
 find_package(OpenGL REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
 find_package(Qt5Core REQUIRED)

@@ -1,5 +1,8 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
+find_package( OpenCV REQUIRED PATHS COMPONENTS core imgcodecs features2d  videoio highgui video calib3d cudaarithm )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+
 if( UNIX )
 	message(STATUS "platform: Linux")
 

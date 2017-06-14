@@ -7,8 +7,6 @@ ENDIF()
 
 PROJECT (RgbdMappingAndRelocalisation)
 
-find_package( OpenCV REQUIRED PATHS $ENV{OPENCV_NEW} NO_DEFAULT_PATH COMPONENTS core imgcodecs features2d  videoio highgui video calib3d cudaarithm )
-
 find_package( CUDA )
 include(FindCUDA)
 
