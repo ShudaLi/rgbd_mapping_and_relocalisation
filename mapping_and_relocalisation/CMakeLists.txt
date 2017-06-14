@@ -8,7 +8,7 @@ project (MappingAndRelocalisation)
 find_package(CUDA)
 include(FindCUDA)
 
-find_package( OpenCV REQUIRED PATHS COMPONENTS core imgcodecs features2d  videoio highgui video calib3d cudaarithm )
+find_package( OpenCV REQUIRED PATHS COMPONENTS core imgcodecs features2d  videoio highgui video calib3d  cudaarithm cudaimgproc cudawarping cudafeatures2d )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 find_package(OpenGL REQUIRED)
@@ -36,7 +36,6 @@ link_directories ( $ENV{GLEW_LIB} )
 	
 if(WIN32)
 	set(QGLVIEWER  optimized QGLViewer2  debug QGLViewerd2 )
-	set(ZLIB optimized zlib debug zlibd )	
 	set(EXTRA_LIBS ${RGBDLIB} ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} OpenNI2
 		freeglut GLU32  glew32 GLU32 opengl32 ${QGLVIEWER} ${QT_LIBRARIES} ${OpenCV_LIBS})
 elseif(UNIX)
@@ -44,13 +43,14 @@ elseif(UNIX)
 	set(GLEWLIB ${GLEW_LIBRARY})
 	set(GLLIB ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY})
 	set(OPENNI2LIB ${OPENNI2_LIBRARY})
-	set(ZLIB ${ZLIB_LIBRARY})
 	set(QGLVIEWER  QGLViewer-qt5 )
 	set(EXTRA_LIBS ${RGBDLIB} ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} OpenNI2
         ${FREEGLUTLIB} ${GLLIB} ${GLEWLIB} ${QGLVIEWER} ${QT_LIBRARIES} ${OpenCV_LIBS})
 endif()
 
 cuda_add_executable(MappingAndRelocalisation Main.cpp  MultiViewer.cpp Data4Viewer.h Data4Viewer.cpp DataLive.cpp MultiViewer.h DataLive.h)
-target_link_libraries( MappingAndRelocalisation ${EXTRA_LIBS} ${ZLIB} Rgbd)
+target_link_libraries( MappingAndRelocalisation ${EXTRA_LIBS} ${ZLIB} Rgbd zlib niftiio
+${core} ${imgcodecs} ${features2d}  ${videoio} ${highgui} ${video} ${calib3d} ${cudaarithm}
+${cudaarithm} ${cudaimgproc} ${cudawarping} ${cudafeatures2d})
 qt5_use_modules(MappingAndRelocalisation OpenGL Gui Widgets Xml)
 #install( TARGETS MappingAndRelocalisation DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/../" )
