@@ -26,13 +26,13 @@
 namespace btl { namespace device {
 	using namespace cv::cuda;
 	using namespace pcl::device;
-GpuMat DLL_EXPORT cuda_icp_fr_2_fr(const Intr& sCamIntr_, float fDistThres_, float fCosAngleThres_,
+GpuMat  cuda_icp_fr_2_fr(const Intr& sCamIntr_, float fDistThres_, float fCosAngleThres_,
 									  const Mat33& RwCurTrans_, const float3& TwCur_, 
 									  const Mat33& RwPrev_, const float3& TwPrev_, const GpuMat& depth_curr_,
 									  const GpuMat& cvgmVMapWorldPrev_, const GpuMat& cvgmNMapWorldPrev_, 
 									  const GpuMat& cvgmVMapLocalCur_,  const GpuMat& cvgmNMapLocalCur_ );
 
-double DLL_EXPORT calc_energy_icp_fr_2_fr(const Intr& sCamIntr_, float fDistThres_, float fCosAngleThres_,
+double  calc_energy_icp_fr_2_fr(const Intr& sCamIntr_, float fDistThres_, float fCosAngleThres_,
 									const Mat33& RwCurTrans_, const float3& TwCur_,
 									const Mat33& RwPrev_, const float3& TwPrev_, const GpuMat& depth_curr_,
 									const GpuMat& cvgmVMapWorldPrev_, const GpuMat& cvgmNMapWorldPrev_,

@@ -33,7 +33,7 @@ namespace btl{ namespace geometry
 	using namespace btl::kinect;
 	using namespace Eigen;
 
-	class DLL_EXPORT CKinFuTracker
+	class  CKinFuTracker
 	{
 	public:
 		//type

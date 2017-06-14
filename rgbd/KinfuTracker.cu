@@ -19,8 +19,6 @@
 //SOFTWARE.
 
 
-#define EXPORT
-
 #include <thrust/device_ptr.h>
 #include <thrust/sort.h>
 

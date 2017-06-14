@@ -29,7 +29,7 @@ using namespace cv::cuda;
 
 namespace btl{ namespace image {
 
-struct DLL_EXPORT SCamera
+struct  SCamera
 {
 	//type
 	typedef std::shared_ptr<SCamera> tp_shared_ptr;

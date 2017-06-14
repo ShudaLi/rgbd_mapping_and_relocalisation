@@ -19,7 +19,6 @@
 //SOFTWARE.
 
 
-#define EXPORT
 #define INFO
 #define _USE_MATH_DEFINES
 //gl

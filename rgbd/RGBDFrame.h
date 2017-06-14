@@ -31,7 +31,7 @@ using namespace Eigen;
 using namespace cv;
 using namespace cv::cuda;
 
-class DLL_EXPORT CRGBDFrame {
+class  CRGBDFrame {
 	//type
 public:
 	typedef std::shared_ptr< CRGBDFrame > tp_shared_ptr;
