@@ -19,22 +19,20 @@ if( UNIX )
 	find_package(GLEW REQUIRED)
 
 	include_directories ( $ENV{OPENNI2_INC} )
-	include_directories ( $ENV{NIFTI_INC} )
-	include_directories ( $ENV{NIFTI_INC}/nifti )
 
 	include_directories ( ${PROJECT_SOURCE_DIR}/common )
 	include_directories ( ${PROJECT_SOURCE_DIR}/rgbd )
+	include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/ )
 elseif( WIN32 )
 	message(STATUS "platform: Windows")
 
 	include_directories ( $ENV{OPENNI2_INC} )
     include_directories ( $ENV{FREEGLUT_INC} )
     include_directories ( $ENV{GLEW_INC} )
-	include_directories ( $ENV{NIFTI_INC} )
-	include_directories ( $ENV{NIFTI_INC}/nifti )
 
 	include_directories ( ${PROJECT_SOURCE_DIR}/common )
 	include_directories ( ${PROJECT_SOURCE_DIR}/rgbd )
+	include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/ )
 endif()
 
 

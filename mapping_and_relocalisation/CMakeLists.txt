@@ -26,6 +26,7 @@ include_directories ( $ENV{FREEGLUT_INC} )
 include_directories ( $ENV{GLEW_INC} )
 include_directories ( ${PROJECT_SOURCE_DIR}/../rgbd )
 include_directories ( ${PROJECT_SOURCE_DIR}/../common/ )
+include_directories ( ${PROJECT_SOURCE_DIR}/../external_libraries/ )
 
 link_directories ( $ENV{QGLVIEWER_LIB} )
 link_directories ( $ENV{OPENNI2_LIB} )
