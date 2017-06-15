@@ -2,6 +2,7 @@
 #Please contact hans-johnson@uiowa.edu for making enhancments/corrections
 PROJECT(NIFTILIB)
 
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/../../zlib)
 INCLUDE_DIRECTORIES(${ZNZLIB_SOURCE_DIR})
 SET(NIFTILIB_SRC nifti1_io.c)
 

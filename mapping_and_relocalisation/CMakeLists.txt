@@ -26,6 +26,8 @@ include_directories ( $ENV{FREEGLUT_INC} )
 include_directories ( $ENV{GLEW_INC} )
 include_directories ( ${PROJECT_SOURCE_DIR}/../rgbd )
 include_directories ( ${PROJECT_SOURCE_DIR}/../common/ )
+include_directories ( ${PROJECT_SOURCE_DIR}/../external_libraries/)
+include_directories ( ${PROJECT_SOURCE_DIR}/../external_libraries/sophus/include/)
 include_directories ( ${PROJECT_SOURCE_DIR}/../external_libraries/nifticlib/niftilib/ )
 
 link_directories ( $ENV{QGLVIEWER_LIB} )
@@ -34,7 +36,7 @@ link_directories ( $ENV{GLEW_LIB} )
 	
 if(WIN32)
 	set(QGLVIEWER  optimized QGLViewer2  debug QGLViewerd2 )
-	set(EXTRA_LIBS ${RGBDLIB} ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} OpenNI2
+	set(EXTRA_LIBS ${RGBDLIB} ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} 
 		freeglut GLU32  glew32 GLU32 opengl32 ${QGLVIEWER} ${QT_LIBRARIES} ${OpenCV_LIBS})
 elseif(UNIX)
 	set(FREEGLUTLIB ${GLUT_glut_LIBRARY})
@@ -42,7 +44,7 @@ elseif(UNIX)
 	set(GLLIB ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY})
 	set(OPENNI2LIB ${OPENNI2_LIBRARY})
 	set(QGLVIEWER  QGLViewer-qt5 )
-	set(EXTRA_LIBS ${RGBDLIB} ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} OpenNI2
+	set(EXTRA_LIBS ${RGBDLIB} ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} 
         ${FREEGLUTLIB} ${GLLIB} ${GLEWLIB} ${QGLVIEWER} ${QT_LIBRARIES} ${OpenCV_LIBS})
 endif()
 

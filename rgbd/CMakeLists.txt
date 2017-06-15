@@ -4,6 +4,8 @@ find_package( OpenCV REQUIRED
 PATHS "$ENV{OPENCV_NEW}" "C:/Program Files (x86)/OpenCV/Lib" 
 COMPONENTS core imgcodecs features2d  videoio highgui video calib3d cudaarithm 
 cudaimgproc cudawarping cudafeatures2d )
+
+include(${PROJECT_SOURCE_DIR}/cmake/UseOpenNI.cmake)
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 if( UNIX )
@@ -20,28 +22,19 @@ if( UNIX )
 	add_definitions(${GLUT_DEFINITIONS})
 
 	find_package(GLEW REQUIRED)
-
-	include_directories ( $ENV{OPENNI2_INC} )
-
-	include_directories ( ${PROJECT_SOURCE_DIR}/common )
-	include_directories ( ${PROJECT_SOURCE_DIR}/rgbd )
-	include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/ )
-	include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/nifticlib/niftilib/ )
-	include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/nifticlib/znzlib/ )
 elseif( WIN32 )
 	message(STATUS "platform: Windows")
 
-	include_directories ( $ENV{OPENNI2_INC} )
     include_directories ( $ENV{FREEGLUT_INC} )
     include_directories ( $ENV{GLEW_INC} )
-
-	include_directories ( ${PROJECT_SOURCE_DIR}/common )
-	include_directories ( ${PROJECT_SOURCE_DIR}/rgbd )
-	include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/ )
-	include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/nifticlib/niftilib/ )
-	include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/nifticlib/znzlib/ )
 endif()
 
+include_directories ( ${PROJECT_SOURCE_DIR}/common )
+include_directories ( ${PROJECT_SOURCE_DIR}/rgbd )
+include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/ )
+include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/sophus/include )
+include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/nifticlib/niftilib/ )
+include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/nifticlib/znzlib/ )
 
 #set(BUILD_SHARED_LIBS  TRUE)
 
