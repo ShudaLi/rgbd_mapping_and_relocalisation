@@ -6,6 +6,7 @@ COMPONENTS core imgcodecs features2d  videoio highgui video calib3d cudaarithm
 cudaimgproc cudawarping cudafeatures2d )
 
 include(${PROJECT_SOURCE_DIR}/cmake/UseOpenNI.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/UseGLEW.cmake)
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 if( UNIX )
@@ -19,8 +20,6 @@ if( UNIX )
 	find_package(GLEW REQUIRED)
 elseif( WIN32 )
 	message(STATUS "platform: Windows")
-
-    include_directories ( $ENV{GLEW_INC} )
 endif()
 
 include_directories ( ${PROJECT_SOURCE_DIR}/common )
