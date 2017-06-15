@@ -22,7 +22,6 @@
 #define _USE_MATH_DEFINES
 #define INFO
 #include <GL/glew.h>
-//#include <GL/freeglut.h>
 
 #include <cuda.h>
 #include <cuda_gl_interop.h>

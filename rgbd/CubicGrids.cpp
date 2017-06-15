@@ -24,7 +24,6 @@
 #define DEFAULT_TRIANGLES_BUFFER_SIZE 
 //gl
 #include <GL/glew.h>
-//#include <GL/freeglut.h>
 #include <cuda.h>
 #include <cuda_gl_interop.h>
 #include <cuda_runtime_api.h>

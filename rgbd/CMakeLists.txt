@@ -29,8 +29,6 @@ include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/ )
 include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/sophus/include )
 include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/nifticlib/niftilib/ )
 include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/nifticlib/znzlib/ )
-#include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/freeglut/include/)
-#set(BUILD_SHARED_LIBS  TRUE)
 
 #find source files
 file(GLOB OTHER_HEADERS "${PARENT_DIR}/common/[a-zA-Z]*.h" "${PARENT_DIR}/common/[a-zA-Z]*.hpp"   )

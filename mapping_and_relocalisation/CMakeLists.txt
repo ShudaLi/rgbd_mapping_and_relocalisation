@@ -26,7 +26,6 @@ include_directories ( $ENV{GLEW_INC} )
 include_directories ( ${PROJECT_SOURCE_DIR}/../rgbd )
 include_directories ( ${PROJECT_SOURCE_DIR}/../common/ )
 include_directories ( ${PROJECT_SOURCE_DIR}/../external_libraries/)
-#include_directories ( ${PROJECT_SOURCE_DIR}/../external_libraries/freeglut/include/)
 include_directories ( ${PROJECT_SOURCE_DIR}/../external_libraries/sophus/include/)
 include_directories ( ${PROJECT_SOURCE_DIR}/../external_libraries/nifticlib/niftilib/ )
 
@@ -50,6 +49,4 @@ cuda_add_executable(MappingAndRelocalisation Main.cpp  MultiViewer.cpp Data4View
 target_link_libraries( MappingAndRelocalisation ${EXTRA_LIBS} ${ZLIB} Rgbd zlib niftiio 
 ${core} ${imgcodecs} ${features2d}  ${videoio} ${highgui} ${video} ${calib3d} ${cudaarithm}
 ${cudaarithm} ${cudaimgproc} ${cudawarping} ${cudafeatures2d} ${xfeatures2d} ${OPENNI_LIBRARY})
-#include(${PROJECT_SOURCE_DIR}/../cmake/LinkOpenNI.cmake)
 qt5_use_modules(MappingAndRelocalisation OpenGL Gui Widgets Xml)
-#install( TARGETS MappingAndRelocalisation DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/../" )
