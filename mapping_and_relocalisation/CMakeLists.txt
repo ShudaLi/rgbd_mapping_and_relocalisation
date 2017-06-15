@@ -9,7 +9,8 @@ include(${PROJECT_SOURCE_DIR}/../cmake/UseOpenNI.cmake)
 find_package(CUDA)
 include(FindCUDA)
 
-find_package( OpenCV REQUIRED PATHS COMPONENTS core imgcodecs features2d  videoio highgui video calib3d  cudaarithm cudaimgproc cudawarping cudafeatures2d xfeatures2d)
+find_package( OpenCV REQUIRED PATHS COMPONENTS core imgcodecs features2d  videoio highgui video calib3d  cudaarithm cudaimgproc cudawarping cudafeatures2d xfeatures2d )
+
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 find_package(OpenGL REQUIRED)

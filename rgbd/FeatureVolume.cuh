@@ -28,22 +28,22 @@ using namespace std;
 using namespace pcl::device;
 namespace btl { namespace device{
 
-int DLL_EXPORT cuda_refine_inliers(float fDistThre_, float NormalAngleThre_, float VisualAngleThre_, int nAppearanceMatched_, const matrix3_cmf& Rw_, const float3& Tw_,
+int  cuda_refine_inliers(float fDistThre_, float NormalAngleThre_, float VisualAngleThre_, int nAppearanceMatched_, const matrix3_cmf& Rw_, const float3& Tw_,
 									const GpuMat& pts_global_reloc_, const GpuMat& nls_global_reloc_, const GpuMat& pts_curr_reloc_, const GpuMat& nls_curr_reloc_,
 									GpuMat* p_relined_inliers_);
 
-void DLL_EXPORT cuda_integrate_features(const pcl::device::Intr& intr, const pcl::device::Mat33& RwInv_, const float3& Cw_, int nFeatureScale_, const short3& resolution_,
+void  cuda_integrate_features(const pcl::device::Intr& intr, const pcl::device::Mat33& RwInv_, const float3& Cw_, int nFeatureScale_, const short3& resolution_,
 												const cv::cuda::GpuMat& cvgmVolume_, const float3& volume_size, const float fTruncDistanceM_, const float& fVoxelSize_,
 												const float fFeatureVoxelSize_[], const vector<short3>& vResolution_, GpuMat* pcvgmFeatureVolumeIdx_,
 												const GpuMat& cvgmKeyPointCurr_, const GpuMat& cvgmDescriptorCurr_, const GpuMat& gpu_key_array_2d_, const int nKeypoints_,
 												vector<int>* p_vOffset_, vector<GpuMat>* pcvgmGlobalKeyPoint_, vector<GpuMat>* pcvgmGlobalDescriptor_);
 
-std::vector<int> DLL_EXPORT cuda_get_occupied_vg(const GpuMat*  feature_volume_idx_,
+std::vector<int>  cuda_get_occupied_vg(const GpuMat*  feature_volume_idx_,
 									 const float* fVoxelSize_, const int nFeatureScale_,
 									 GpuMat* ptr_pts_world_, const vector<short3>& vResolution_,
 									 GpuMat* ptr_feature_idx_);
 
-void DLL_EXPORT cuda_nonmax_suppress_n_integrate(const pcl::device::Intr& intr_, const pcl::device::Mat33& RwInv_, const float3& Cw_, const short3& resolution_,
+void  cuda_nonmax_suppress_n_integrate(const pcl::device::Intr& intr_, const pcl::device::Mat33& RwInv_, const float3& Cw_, const short3& resolution_,
 													const GpuMat& volume_, const float3& volume_size, const float& fVoxelSize_,
 													const float fFeatureVoxelSize_[], int nFeatureScale_, const vector<short3>& vResolution_, GpuMat* feature_volume_,
 													const GpuMat& pts_curr_, const GpuMat& nls_curr_,

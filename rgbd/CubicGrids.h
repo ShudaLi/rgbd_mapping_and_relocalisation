@@ -28,7 +28,7 @@ namespace btl{ namespace geometry
 	using namespace btl::kinect;
 	using namespace std;
 	using namespace pcl::device;
-	class DLL_EXPORT CCubicGrids
+	class  CCubicGrids
 	{
 		//type
 	public:

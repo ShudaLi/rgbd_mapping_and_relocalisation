@@ -26,12 +26,12 @@
 namespace btl { namespace device{
 using namespace pcl::device;
 using namespace cv::cuda;
-void DLL_EXPORT cuda_integrate_depth(GpuMat& cvgmDepthScaled_,
+void  cuda_integrate_depth(GpuMat& cvgmDepthScaled_,
 									const float fVoxelSize_, const float fTruncDistanceM_, 
 									const Mat33& Rw_, const float3& Cw_, 
 									const Intr& intr, const short3& resolution_, 
 									GpuMat* pcvgmVolume_);
-void DLL_EXPORT cuda_init_tsdf (GpuMat* p_volume_, short3 resolution_);
+void  cuda_init_tsdf (GpuMat* p_volume_, short3 resolution_);
 
 
 }//device

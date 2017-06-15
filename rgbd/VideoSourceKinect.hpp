@@ -32,7 +32,7 @@ namespace kinect{
 namespace btl_img = btl::image;
 namespace btl_knt = btl::kinect;
 
-class DLL_EXPORT CVideoSourceKinect 
+class  CVideoSourceKinect 
 {
 public:
 	//type

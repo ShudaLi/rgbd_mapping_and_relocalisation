@@ -20,7 +20,6 @@
 
 
 #define _USE_MATH_DEFINES
-#define EXPORT
 #define INFO
 #include <GL/glew.h>
 #include <GL/freeglut.h>

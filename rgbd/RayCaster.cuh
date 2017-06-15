@@ -27,7 +27,7 @@
 namespace pcl { namespace device{
 	using namespace cv::cuda;
 	using namespace pcl::device;
-	void DLL_EXPORT cuda_ray_cast ( const pcl::device::Intr& intr, const pcl::device::Mat33& RwInv_, const float3& Cw_, bool bFineCast_,
+	void  cuda_ray_cast ( const pcl::device::Intr& intr, const pcl::device::Mat33& RwInv_, const float3& Cw_, bool bFineCast_,
 							  const float fTruncDistanceM_, const float& fVoxelSize_, const short3& resolution_, const float3& dimensions_,
 							  const GpuMat& cvgmVolume_, GpuMat* pVMap_, GpuMat* pNMap_ );
 

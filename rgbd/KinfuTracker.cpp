@@ -23,8 +23,6 @@
 #include <thrust/sort.h>
 //#include <thrust/functional.h>
 
-#define EXPORT 
-
 #define INFO
 #include <GL/glew.h>
 #include <GL/freeglut.h>

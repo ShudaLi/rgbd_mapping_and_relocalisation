@@ -79,11 +79,7 @@ CDataLive::CDataLive()
 
 void CDataLive::loadFromYml(){
 	//cout << "DataLive::loadFromYml()"<< endl;
-#ifdef __gnu_linux__
-	cv::FileStorage cFSRead ( "../mapping_and_relocalisation/MappingAndRelocalisationControlUbuntu.yml", cv::FileStorage::READ );
-#elif _WIN32
-	cv::FileStorage cFSRead ( "..\\mapping_and_relocalisation\\MappingAndRelocalisationControl.yml", cv::FileStorage::READ );
-#endif 
+	cv::FileStorage cFSRead ( "..\\..\\mapping_and_relocalisation\\MappingAndRelocalisationControl.yml", cv::FileStorage::READ );
 	if (!cFSRead.isOpened()) {
 		cout << "Load MappingAndRelocalisationControl failed." <<endl;
 		return;

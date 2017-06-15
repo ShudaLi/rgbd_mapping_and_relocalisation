@@ -28,7 +28,7 @@
 
 namespace btl{	namespace gl_util
 {
-class DLL_EXPORT CGLUtil
+class  CGLUtil
 {
 public:
 	//type
