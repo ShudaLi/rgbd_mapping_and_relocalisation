@@ -16,16 +16,10 @@ if( UNIX )
 	link_directories(${OpenGL_LIBRARY_DIRS})
 	add_definitions(${OpenGL_DEFINITIONS})
 
-	find_package(GLUT REQUIRED)
-	include_directories(${GLUT_INCLUDE_DIRS})
-	link_directories(${GLUT_LIBRARY_DIRS})
-	add_definitions(${GLUT_DEFINITIONS})
-
 	find_package(GLEW REQUIRED)
 elseif( WIN32 )
 	message(STATUS "platform: Windows")
 
-    include_directories ( $ENV{FREEGLUT_INC} )
     include_directories ( $ENV{GLEW_INC} )
 endif()
 
@@ -35,7 +29,7 @@ include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/ )
 include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/sophus/include )
 include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/nifticlib/niftilib/ )
 include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/nifticlib/znzlib/ )
-
+#include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/freeglut/include/)
 #set(BUILD_SHARED_LIBS  TRUE)
 
 #find source files
@@ -67,17 +61,3 @@ file(GLOB KINFU_CUDA_SOURCES "kinfu/[a-zA-Z]*.cu")
 message(STATUS "cuda source names: ${KINFU_CUDA_SOURCES}")
 
 cuda_add_library( Rgbd ${RGBD_HEADERS} ${OTHER_HEADERS} ${RGBD_SOURCES} ${RGBD_CUDA_HEADERS} ${RGBD_CUDA_SOURCES} ${KINFU_HEADERS} ${KINFU_SOURCES} ${KINFU_CUDA_HEADERS} ${KINFU_CUDA_SOURCES})
-
-#if(MSVC)
-#	set_target_properties(Rgbd PROPERTIES
-#		DEBUG_POSTFIX "${LIB_TARGET_SUFFIX}d"
-#		RELEASE_POSTFIX "${LIB_TARGET_SUFFIX}"
-#		MINSIZEREL_POSTFIX "${LIB_TARGET_SUFFIX}"
-#		RELWITHDEBINFO_POSTFIX "${LIB_TARGET_SUFFIX}"
-#	)
-#endif()
-#install( TARGETS Rgbd DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/../" )
-
-
-
-

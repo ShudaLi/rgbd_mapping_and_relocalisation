@@ -22,7 +22,7 @@
 #define _USE_MATH_DEFINES
 #define INFO
 #include <GL/glew.h>
-#include <GL/freeglut.h>
+//#include <GL/freeglut.h>
 
 #include <cuda.h>
 #include <cuda_gl_interop.h>
@@ -157,42 +157,42 @@ namespace btl{	namespace gl_util
 
 	void CGLUtil::drawString(const char *str, int x, int y, float color[4], void *font) const
 	{
-		// backup current model-view matrix
-		glMatrixMode(GL_MODELVIEW);
-		glPushMatrix();                     // save current modelview matrix
-		glLoadIdentity();                   // reset modelview matrix
+		//// backup current model-view matrix
+		//glMatrixMode(GL_MODELVIEW);
+		//glPushMatrix();                     // save current modelview matrix
+		//glLoadIdentity();                   // reset modelview matrix
 
-		// set to 2D orthogonal projection
-		glMatrixMode(GL_PROJECTION);        // switch to projection matrix
-		glPushMatrix();                     // save current projection matrix
-		glLoadIdentity();                   // reset projection matrix
-		gluOrtho2D(0, 1280, 0, 480);  // set to orthogonal projection
+		//// set to 2D orthogonal projection
+		//glMatrixMode(GL_PROJECTION);        // switch to projection matrix
+		//glPushMatrix();                     // save current projection matrix
+		//glLoadIdentity();                   // reset projection matrix
+		//gluOrtho2D(0, 1280, 0, 480);  // set to orthogonal projection
 
-		glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT); // lighting and color mask
-		glDisable(GL_LIGHTING);     // need to disable lighting for proper text color
-		glDisable(GL_TEXTURE_2D);
+		//glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT); // lighting and color mask
+		//glDisable(GL_LIGHTING);     // need to disable lighting for proper text color
+		//glDisable(GL_TEXTURE_2D);
 
-		glColor4fv(color);          // set text color
-		glRasterPos2i(x, y);        // place text position
+		//glColor4fv(color);          // set text color
+		//glRasterPos2i(x, y);        // place text position
 
-		// loop all characters in the string
-		while(*str)
-		{
-			glutBitmapCharacter(font, *str);
-			
-			++str;
-		}
+		//// loop all characters in the string
+		//while(*str)
+		//{
+		//	glutBitmapCharacter(font, *str);
+		//	
+		//	++str;
+		//}
 
-		//glEnable(GL_TEXTURE_2D);
-		//glEnable(GL_LIGHTING);
-		glPopAttrib();
+		////glEnable(GL_TEXTURE_2D);
+		////glEnable(GL_LIGHTING);
+		//glPopAttrib();
 
-		// restore projection matrix
-		glPopMatrix();                   // restore to previous projection matrix
+		//// restore projection matrix
+		//glPopMatrix();                   // restore to previous projection matrix
 
-		// restore modelview matrix
-		glMatrixMode(GL_MODELVIEW);      // switch to modelview matrix
-		glPopMatrix();                   // restore to previous modelview matrix
+		//// restore modelview matrix
+		//glMatrixMode(GL_MODELVIEW);      // switch to modelview matrix
+		//glPopMatrix();                   // restore to previous modelview matrix
 	}
 
 	void CGLUtil::errorDetectorGL() const
@@ -424,7 +424,7 @@ namespace btl{	namespace gl_util
 
 	void CGLUtil::mouseMotion ( int nX_, int nY_ )
 	{
-		if ( _bLButtonDown == true )
+		/*if ( _bLButtonDown == true )
 		{
 			glDisable     ( GL_BLEND );
 			_nXMotion = nX_ - _nXLeftDown;
@@ -443,13 +443,13 @@ namespace btl{	namespace gl_util
 			_dZoom = _dZoomLast + (_nXMotion + _nYMotion)/200.;
 		}
 
-		glutPostRedisplay();
+		glutPostRedisplay();*/
 	}
 
 
 	void CGLUtil::mouseClick ( int nButton_, int nState_, int nX_, int nY_ )
 	{
-		if ( nButton_ == GLUT_LEFT_BUTTON )
+		/*if ( nButton_ == GLUT_LEFT_BUTTON )
 		{
 			if ( nState_ == GLUT_DOWN )
 			{
@@ -465,7 +465,7 @@ namespace btl{	namespace gl_util
 				_dYLastAngle = _dYAngle;
 				_bLButtonDown = false;
 			}
-			glutPostRedisplay();
+			//glutPostRedisplay();
 		}
 		else if ( GLUT_RIGHT_BUTTON )
 		{
@@ -483,14 +483,14 @@ namespace btl{	namespace gl_util
 				_dYLast = _dY;
 				_bRButtonDown = false;
 			}
-			glutPostRedisplay();
-		}
+			//glutPostRedisplay();
+		}*/
 
 		return;
 	}
 	void CGLUtil::normalKeys ( unsigned char key, int x, int y )
 	{
-		switch( key )
+		/*switch( key )
 		{
 		case 27:
 			exit ( 0 );
@@ -541,7 +541,7 @@ namespace btl{	namespace gl_util
 			setInitialPos();
 			glutPostRedisplay();
 			break;
-		}
+		}*/
 		return;
 	}
 
@@ -750,7 +750,7 @@ namespace btl{	namespace gl_util
 	}
 
 	void CGLUtil::specialKeys( int key, int x, int y ){
-		switch ( key ) {
+		/*switch ( key ) {
 		case GLUT_KEY_F2: //display camera
 			_bDisplayCamera = !_bDisplayCamera;
 			glutPostRedisplay();
@@ -759,7 +759,7 @@ namespace btl{	namespace gl_util
 			_bRenderReference = !_bRenderReference;
 			glutPostRedisplay();
 			break;
-		}
+		}*/
 	}
 
 	void CGLUtil::viewerGL()
