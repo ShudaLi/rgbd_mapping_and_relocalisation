@@ -23,15 +23,6 @@ endif()
 
 set(CUDA_NVCC_FLAGS; -arch=sm_30 )#cmake
 
-#find_package(Qt5OpenGL REQUIRED PATHS $ENV{QtOpenGL})
-#find_package(Qt5Core REQUIRED  PATHS $ENV{QtCore})
-#find_package(Qt5Gui REQUIRED  PATHS $ENV{QtGui})
-#find_package(Qt5Xml REQUIRED  PATHS $ENV{QtXml})
-include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/sophus/include/ )
-include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/ )
-include_directories ( ${PROJECT_SOURCE_DIR}/external_libraries/zlib/ )
-#Notice that the headers only include the headers that needs to be processed by moc.
-#QT5_WRAP_CPP(HEADERS_MOC ${HEADERS})
 ADD_SUBDIRECTORY(external_libraries)
 ADD_SUBDIRECTORY(rgbd)
 ADD_SUBDIRECTORY(mapping_and_relocalisation)
