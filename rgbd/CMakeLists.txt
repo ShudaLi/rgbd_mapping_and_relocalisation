@@ -7,6 +7,8 @@ cudaimgproc cudawarping cudafeatures2d )
 
 include(${PROJECT_SOURCE_DIR}/cmake/UseOpenNI.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseGLEW.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/UseQGLViewer.cmake)
+
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 if( UNIX )

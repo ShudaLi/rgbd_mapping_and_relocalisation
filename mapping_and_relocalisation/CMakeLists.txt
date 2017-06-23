@@ -6,6 +6,7 @@ endif()
 project (MappingAndRelocalisation)
 include(${PROJECT_SOURCE_DIR}/../cmake/UseOpenNI.cmake)
 include(${PROJECT_SOURCE_DIR}/../cmake/UseGLEW.cmake)
+include(${PROJECT_SOURCE_DIR}/../cmake/UseQGLViewer.cmake)
 
 find_package(CUDA)
 include(FindCUDA)
