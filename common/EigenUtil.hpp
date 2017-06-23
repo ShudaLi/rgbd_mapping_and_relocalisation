@@ -548,8 +548,8 @@ T aoArun ( const Eigen::Matrix<T,-1,-1,0,-1,-1> & eimXw_, const Eigen::Matrix<T,
 
 template< class T > /*Eigen::Matrix<float,-1,-1,0,-1,-1> = Eigen::MatrixXf*/
 T aoRansac ( const Eigen::Matrix<T,-1,-1,0,-1,-1> & eimXw_, const Eigen::Matrix<T,-1,-1,0,-1,-1>&  eimXc_, 
-							  const T dist_thre_, const int Iter,
-							  Eigen::Matrix< T, 3, 3>* pR_, Eigen::Matrix< T , 3, 1 >* pT_, cv::Mat * pInliers_, int nMethod_ = HORN ){
+			const T dist_thre_, const int Iter,
+			Eigen::Matrix< T, 3, 3>* pR_, Eigen::Matrix< T , 3, 1 >* pT_, cv::Mat * pInliers_, int nMethod_ = HORN ){
 	// A is from World  B is Local coordinate system
 	// eimB_ = R * eimA_ + T; //R and t is defined in world and transform a point in world to local
 	// main references: http://www.mathworks.com/matlabcentral/fileexchange/22422-absolute-orientation
