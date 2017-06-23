@@ -1,9 +1,9 @@
 ###################
-# UseOpenNI.cmake #
+# UseQGLVIEWER.cmake #
 ###################
 
 IF(MSVC_IDE)
-	FIND_PATH(GLEW_ROOT LICENSE HINTS "C:/all_libs/glew")
+	FIND_PATH(QGLVIEWER_ROOT LICENSE HINTS "C:/all_libs/glew")
 ELSEIF("${CMAKE_SYSTEM}" MATCHES "Linux")
 	#FIND_PATH(OPENNI_ROOT LICENSE HINTS ~/Software/OpenNI2)
 ELSE()

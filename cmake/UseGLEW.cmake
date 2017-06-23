@@ -1,7 +1,6 @@
 ###################
-# UseOpenNI.cmake #
+# UseGLEW.cmake #
 ###################
-
 
 IF(MSVC_IDE)
 	FIND_PATH(GLEW_ROOT LICENSE HINTS "C:/all_libs/glew")
