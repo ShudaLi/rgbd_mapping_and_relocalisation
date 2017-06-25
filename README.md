@@ -10,12 +10,14 @@ code has been tested on both Ubuntu and Windows platforms.
 
 [1] RGB-D Relocalisation Using Pairwise Geometry and Concise Key Point Sets. 
 Li, S., & Calway, A. ICRA, 2015. 
+[2] Absolute pose estimation using multiple forms of correspondences from RGB-D frames. 
+Li, S., & Calway, A. ICRA, 2016. 
 
-Please consider citing above publication if you use this software in your own 
+Please cite above publication if you use this software in your own 
 work.
 
-The repository is maintained by Shuda Li (csxsl@bristol.ac.uk). Feel free to contact
-me, if you have any question or suggestions.
+The repository is maintained by Shuda Li (lishuda1980@gmail.com). Feel free to contact
+me, if you have any questions or suggestions.
 
 -------------------------------------------------------------------------------
 
@@ -48,7 +50,6 @@ in the source codes.
 - Eigen (GNU free software)
 - Sopuhs (GNU free software)
 - OpenNI 2 (Apache license)
-- Boost (BSD License)
 - GLEW (Free commercial use)
 - NIFTI (Public domain)
 - ZLIB (Free commercial use)
