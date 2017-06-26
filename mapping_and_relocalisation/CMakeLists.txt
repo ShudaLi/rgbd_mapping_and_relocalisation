@@ -22,7 +22,7 @@ find_package(Qt5Gui REQUIRED)
 find_package(Qt5Xml REQUIRED)
 
 QT5_WRAP_CPP(HEADERS_MOC ${HEADERS})
-
+set(CUDA_NVCC_FLAGS; -arch=sm_30) #-arch=sm_35) #-arch=sm_21)
 include_directories ( $ENV{QGLVIEWER_INC} )
 #include_directories ( $ENV{GLEW_INC} )
 include_directories ( ${PROJECT_SOURCE_DIR}/../rgbd )

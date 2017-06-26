@@ -1,7 +1,7 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
 find_package( OpenCV REQUIRED 
-PATHS "$ENV{OPENCV_NEW}" "C:/Program Files (x86)/OpenCV/Lib" 
+PATHS "$ENV{OPENCV_NEW}" "D:/install/opencv/install" 
 COMPONENTS core imgcodecs features2d  videoio highgui video calib3d cudaarithm 
 cudaimgproc cudawarping cudafeatures2d )
 
