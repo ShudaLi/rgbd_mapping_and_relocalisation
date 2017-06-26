@@ -35,9 +35,8 @@ link_directories ( $ENV{QGLVIEWER_LIB} )
 #link_directories ( $ENV{GLEW_LIB} )
 	
 if(WIN32)
-	set(QGLVIEWER  optimized QGLViewer2  debug QGLViewerd2 )
 	set(EXTRA_LIBS ${RGBDLIB} ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} 
-		GLU32 GLU32 opengl32 ${QGLVIEWER} ${QT_LIBRARIES} ${OpenCV_LIBS})
+		GLU32 GLU32 opengl32 ${QGLVIEWER_LIBRARY} ${QT_LIBRARIES} ${OpenCV_LIBS})
 elseif(UNIX)
 	#set(GLEWLIB ${GLEW_LIBRARY})
 	set(GLLIB ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY})
