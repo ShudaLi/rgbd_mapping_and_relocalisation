@@ -358,6 +358,7 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 		//updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_M && (pEvent_->modifiers() & Qt::ShiftModifier)) {
+		//uppercase m
 		/*if ((_nStatus&VideoSourceKinect::MASK1) == VideoSourceKinect::PAUSE){
 		_nStatus = (_nStatus&(~VideoSourceKinect::MASK1))|VideoSourceKinect::CONTINUE;
 		}else if ((_nStatus&VideoSourceKinect::MASK1) == VideoSourceKinect::CONTINUE){

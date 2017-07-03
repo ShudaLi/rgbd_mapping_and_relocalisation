@@ -155,7 +155,7 @@ void CDataLive::reset(){
 	//reset shared pointer, notice that the relationship makes a lot of sense
 	_pTracker.reset();	_pCubicGrids.reset();	_pDepth.reset(); _pVirtualGlobalView.reset(); _pVirtualCameraView.reset(); _pKinect.reset();
 
-	_pKinect.reset( new btl::kinect::CVideoSourceKinect(_uResolution,_uPyrHeight,_bUseNIRegistration,_eivCw,_cam_param_path) );
+	_pKinect.reset(new btl::kinect::CVideoSourceKinect(_uResolution, _uPyrHeight, _bUseNIRegistration, _eivCw, _cam_param_path));
 	switch(_nMode)
 	{
 		using namespace btl::kinect;

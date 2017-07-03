@@ -992,6 +992,23 @@ void CCubicGrids::gpuMarchingCubes(){
 	_normals_buffer.colRange(0, _total_vertexes / 3).download(_normals);
 	pcl::device::unbindTextures();
 
+	exportCSV();
+
+	return;
+}
+
+
+void CCubicGrids::exportCSV() const {
+	ofstream myfile;
+	myfile.open("export.asc");
+	for (int t = 0; t < _normals.cols; t++)
+	{
+		const float* vv = _triangles.ptr<float>() + t * 3 * 3;
+		if (abs(*vv) > 0.01) {
+			myfile << *vv << ", " << *(vv + 1) << ", " << *(vv + 2) << endl;
+		}
+	}
+	myfile.close();
 	return;
 }
 

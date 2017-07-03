@@ -73,6 +73,8 @@ public:
 	virtual void make_statistics_on_estimation(){;}
 
 	btl::kinect::CVideoSourceKinect::tp_shared_ptr _pKinect;
+	btl::geometry::CKinFuTracker::tp_shared_ptr _pTracker;
+	btl::geometry::CCubicGrids::tp_shared_ptr _pCubicGrids;
 	btl::gl_util::CGLUtil::tp_shared_ptr _pGL;
 
 	btl_img::SCamera::tp_shared_ptr _pVirtualCamera;
@@ -81,8 +83,6 @@ public:
 	btl::kinect::CRGBDFrame::tp_shared_ptr _pVirtualCameraView;
 	btl::kinect::CRGBDFrame::tp_shared_ptr _pCameraView2;
 
-	btl::geometry::CCubicGrids::tp_shared_ptr _pCubicGrids;
-	btl::geometry::CCubicGrids::tp_shared_ptr _pCubicGridsMoved;
 	GLuint _uTexture;
 
 	std::string _strPoseEstimationMethod;
@@ -126,7 +126,8 @@ public:
 	uchar _nNormalMap;
 	double _mi, _ma;
 
-	cv::String _global_model_folder;
+	//cv::String _global_model_folder;
+	std::string _global_model_folder;
 	std::vector<cv::String> _vstrPoseEstimationMethod;
 	std::vector<cv::String> _vstrICPMethod;
 	std::vector<cv::String> _vstrMatchingMethod;
@@ -174,7 +175,6 @@ public:
 	String _result_folder;
 	vector<int> vEasy;
 	vector<int> vHard;
-	btl::geometry::CKinFuTracker::tp_shared_ptr _pTracker;
 };
 
 

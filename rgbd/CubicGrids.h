@@ -80,6 +80,7 @@ namespace btl{ namespace geometry
 		void displayAllGlobalFeatures(int lvl_, bool bRenderSpheres_) const;
 		void displayTriangles() const;
 		void gpuMarchingCubes();
+		void exportCSV() const;
 	public:
 		float _fx, _fy, _cx, _cy;
 		pcl::device::Intr _intrinsics;
