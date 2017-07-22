@@ -78,7 +78,7 @@ CDataLive::CDataLive()
 
 void CDataLive::loadFromYml(){
 	//cout << "DataLive::loadFromYml()"<< endl;
-	cv::FileStorage cFSRead ( "..\\..\\mapping_and_relocalisation\\MappingAndRelocalisationControl.yml", cv::FileStorage::READ );
+	cv::FileStorage cFSRead ( "..//..//mapping_and_relocalisation//MappingAndRelocalisationControl.yml", cv::FileStorage::READ );
 	if (!cFSRead.isOpened()) {
 		cout << "Load MappingAndRelocalisationControl failed." <<endl;
 		return;

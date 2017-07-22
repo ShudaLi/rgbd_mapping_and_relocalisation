@@ -496,9 +496,9 @@ void convert2DisparityDomain(const cv::Mat_<T>& cvDepth_, cv::Mat* pcvDisparity_
 template< class T>
 void convert2DepthDomain(const cv::Mat& cvDisparity_, cv::Mat* pcvDepth_, int nType_ ) // nType must be identical with T
 {
-	BTL_ERROR(cvDisparity_.channels()>1, "CVUtil::convert2DepthDomain() only available for 1-channel cvDisparity_" );
-	BTL_ERROR(!cvDisparity_.data, "CVUtil::convert2DepthDomain() input cvDisparity_ is empty.");
-	BTL_ERROR(cvDisparity_.type() != CV_32FC1, "CVUtil::convert2DepthDomain() input cvDisparity_ must be CV_32FC1 type.");
+	//BTL_ERROR(cvDisparity_.channels()>1, "CVUtil::convert2DepthDomain() only available for 1-channel cvDisparity_" );
+	//BTL_ERROR(!cvDisparity_.data, "CVUtil::convert2DepthDomain() input cvDisparity_ is empty.");
+	//BTL_ERROR(cvDisparity_.type() != CV_32FC1, "CVUtil::convert2DepthDomain() input cvDisparity_ must be CV_32FC1 type.");
 
 	cv::Mat& cvDepth_ = *pcvDepth_;
 	cvDepth_.create(cvDisparity_.size(),nType_);
@@ -618,7 +618,7 @@ void gaussianC1FilterInDisparity(cv::Mat* pcvDepth_, double dSigmaDisparity_, do
 template< class T >
 void downSampling( const cv::Mat& cvmOrigin_, cv::Mat* pcvmHalf_)
 {
-	BTL_ASSERT(1==cvmOrigin_.channels(),"downSampling() only down samples 1 channel cv::Mat.");
+	// BTL_ASSERT(1==cvmOrigin_.channels(),"downSampling() only down samples 1 channel cv::Mat.");
 	cv::Mat& cvmHalf_ = *pcvmHalf_;
 	cvmHalf_.create(cvmOrigin_.rows/2,cvmOrigin_.cols/2,cvmOrigin_.type());
 		

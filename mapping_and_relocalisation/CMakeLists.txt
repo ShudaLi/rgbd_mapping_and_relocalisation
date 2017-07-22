@@ -11,10 +11,9 @@ include(${PROJECT_SOURCE_DIR}/../cmake/UseQGLViewer.cmake)
 find_package(CUDA)
 include(FindCUDA)
 
-find_package( OpenCV REQUIRED PATHS COMPONENTS core imgcodecs features2d  videoio highgui video calib3d  cudaarithm cudaimgproc cudawarping cudafeatures2d xfeatures2d )
-
+find_package( OpenCV REQUIRED )
 include_directories( ${OpenCV_INCLUDE_DIRS} )
-
+include_directories( /usr/local/lib )
 find_package(OpenGL REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
 find_package(Qt5Core REQUIRED)
@@ -39,16 +38,17 @@ if(WIN32)
 	set(EXTRA_LIBS ${RGBDLIB} ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} 
 		GLU32 GLU32 opengl32 ${QT_LIBRARIES} ${OpenCV_LIBS})
 elseif(UNIX)
+	FIND_LIBRARY(GLUT_LIBRARY glut HINTS "/usr/lib/x86_64-linux-gnu")
+	FIND_PATH(GLUT_INCLUDE_DIR glut.h HINTS "/usr/include/GL")
 	#set(GLEWLIB ${GLEW_LIBRARY})
 	set(GLLIB ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY})
 	set(OPENNI2LIB ${OPENNI2_LIBRARY})
-	set(QGLVIEWER  QGLViewer-qt5 )
+	set(QGLVIEWER  ${QGLVIEWER_LIBRARY} )
 	set(EXTRA_LIBS ${RGBDLIB} ${CUDA_CUDA_LIBRARY} ${CUDA_CUDART_LIBRARY} 
-        ${GLLIB} ${GLEWLIB} ${QGLVIEWER} ${QT_LIBRARIES} ${OpenCV_LIBS})
+        ${GLLIB} ${GLEWLIB} ${QGLVIEWER} ${QT_LIBRARIES} ${OpenCV_LIBS} ${GLUT_LIBRARY} 	      ${OPENGL_LIBRARY} -lGLEW -lstdc++fs)
 endif()
 
 cuda_add_executable(MappingAndRelocalisation Main.cpp  MultiViewer.cpp Data4Viewer.h Data4Viewer.cpp DataLive.cpp MultiViewer.h DataLive.h)
 target_link_libraries( MappingAndRelocalisation ${EXTRA_LIBS} ${ZLIB} Rgbd zlib niftiio 
-${core} ${imgcodecs} ${features2d}  ${videoio} ${highgui} ${video} ${calib3d} ${cudaarithm}
-${cudaarithm} ${cudaimgproc} ${cudawarping} ${cudafeatures2d} ${xfeatures2d} ${OPENNI_LIBRARY} ${GLEW_LIBRARY} ${QGLVIEWER})
+${OPENNI_LIBRARY} ${GLEW_LIBRARY} ${QGLVIEWER} ${OpenCV_LIBS})
 qt5_use_modules(MappingAndRelocalisation OpenGL Gui Widgets Xml)

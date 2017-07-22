@@ -195,6 +195,7 @@ Eigen::Matrix< T, Eigen::Dynamic, Eigen::Dynamic >& operator << ( Eigen::Matrix<
 template < class T , int ROW, int COL>
 Eigen::Matrix< T, ROW, COL >& operator << ( Eigen::Matrix< T, ROW, COL >& eiMat_, const std::vector< std::vector< T > >& vvVec_ )
 {
+	/*
     if ( ROW != vvVec_.size() )
     {
         CError cE;
@@ -207,7 +208,7 @@ Eigen::Matrix< T, ROW, COL >& operator << ( Eigen::Matrix< T, ROW, COL >& eiMat_
         cE << CErrorInfo ( " std::vector<> is inconsistent with COL of Matrix. \n" );
         throw cE;
     }
-
+	*/
     for ( int r = 0; r < vvVec_.size(); r++ )
         for ( int c = 0; c < vvVec_[r].size(); c++ )
         {
@@ -234,12 +235,12 @@ cv::Point3_< T >& operator << ( cv::Point3_< T >& cvPt_, const std::vector< T >&
     {
         cvPt_.x = cvPt_.y = cvPt_.z = 0;
     }
-    else if ( 3 != vVec_.size() )
-    {
-        CError cE;
-        cE << CErrorInfo ( " std::vector<> is inconsistent with cv::Point3_. \n" );
-        throw cE;
-    }
+    // else if ( 3 != vVec_.size() )
+    // {
+    //     CError cE;
+    //     cE << CErrorInfo ( " std::vector<> is inconsistent with cv::Point3_. \n" );
+    //     throw cE;
+    // }
     else
     {
         cvPt_.x = vVec_[0];
@@ -257,12 +258,12 @@ cv::Point_< T >& operator << ( cv::Point_< T >& cvPt_, const std::vector< T >& v
     {
         cvPt_.x = cvPt_.y = 0;
     }
-    else if ( 2 != vVec_.size() )
-    {
-        CError cE;
-        cE << CErrorInfo ( " std::vector<> is inconsistent with cv::Point3_. \n" );
-        throw cE;
-    }
+    // else if ( 2 != vVec_.size() )
+    // {
+    //     CError cE;
+    //     cE << CErrorInfo ( " std::vector<> is inconsistent with cv::Point3_. \n" );
+    //     throw cE;
+    // }
     else
     {
         cvPt_.x = vVec_[0];

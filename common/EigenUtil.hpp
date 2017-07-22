@@ -1209,9 +1209,9 @@ Eigen::Matrix<T,2,1> aoWithNormalWith2dConstraintRansac ( const Eigen::Matrix<T,
 
 template< class T > /*Eigen::Matrix<float,-1,-1,0,-1,-1> = Eigen::MatrixXf*/
 Eigen::Matrix<T,2,1> aoWithNormaln2dConstraintRansac2( const Eigen::Matrix<T,-1,-1,0,-1,-1>& eimXw_, const Eigen::Matrix<T,-1,-1,0,-1,-1>& eimNlw_, 
-																			   const Eigen::Matrix<T,-1,-1,0,-1,-1>& eimXc_, const Eigen::Matrix<T,-1,-1,0,-1,-1>& eimNlc_, 
-																			   const T dist_thre_, const T angle_thre_, const T visual_angle_thre_, const int Iter_, 
-																			   Eigen::Matrix< T , 3, 3>* pR_, Eigen::Matrix< T , 3, 1 >* pT_, cv::Mat * pInliers_ ){
+													   const Eigen::Matrix<T,-1,-1,0,-1,-1>& eimXc_, const Eigen::Matrix<T,-1,-1,0,-1,-1>& eimNlc_, 
+													   const T dist_thre_, const T angle_thre_, const T visual_angle_thre_, const int Iter_, 
+													   Eigen::Matrix< T , 3, 3>* pR_, Eigen::Matrix< T , 3, 1 >* pT_, cv::Mat * pInliers_ ){
 	// A is from World  B is Local coordinate system
 	// eimB_ = R * eimA_ + T; //R and t is defined in world and transform a point in world to local
 	// main references: http://www.mathworks.com/matlabcentral/fileexchange/22422-absolute-orientation
