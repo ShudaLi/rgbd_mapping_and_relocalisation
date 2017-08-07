@@ -194,30 +194,30 @@ void CVideoSourceKinect::initKinect()
 
 	// set as the highest resolution 0 for 480x640 
 	
-	char _serial[100];
-	int size = sizeof(_serial);
-	_device.getProperty(openni::DEVICE_PROPERTY_SERIAL_NUMBER, &_serial, &size);
-	_serial_number = string(_serial);
-	cout << _serial_number << endl;
+	//char _serial[100];
+	//int size = sizeof(_serial);
+	//_device.getProperty(openni::DEVICE_PROPERTY_SERIAL_NUMBER, &_serial, &size);
+	//_serial_number = string(_serial);
+	//cout << _serial_number << endl;
 
-	Mat cpuClibXYxZ0, cpuMask0;
-	if (!loadLocation(&_vRegularLocations))
-	{
-		_bMapUndistortionOn = false;
-		return;
-	}
-	loadCoefficient(0, _vRegularLocations.size(), &cpuClibXYxZ0, &cpuMask0);
-	_calibXYxZ[0].upload(cpuClibXYxZ0);
-	_mask[0].upload(cpuMask0);
-	_fCutOffDistance = _vRegularLocations.back();
+	//Mat cpuClibXYxZ0, cpuMask0;
+	//if (!loadLocation(&_vRegularLocations))
+	//{
+	//	_bMapUndistortionOn = false;
+	//	return;
+	//}
+	//loadCoefficient(0, _vRegularLocations.size(), &cpuClibXYxZ0, &cpuMask0);
+	//_calibXYxZ[0].upload(cpuClibXYxZ0);
+	//_mask[0].upload(cpuMask0);
+	//_fCutOffDistance = _vRegularLocations.back();
 
-	if (_uResolution == 1) {
-		btl::device::cuda_resize_coeff(_calibXYxZ[0], &_calibXYxZ[1]);
-		cuda::resize(_mask[0], _mask[1], Size(_mask[0].cols / 2, _mask[0].rows / 2));
-	}
+	//if (_uResolution == 1) {
+	//	btl::device::cuda_resize_coeff(_calibXYxZ[0], &_calibXYxZ[1]);
+	//	cuda::resize(_mask[0], _mask[1], Size(_mask[0].cols / 2, _mask[0].rows / 2));
+	//}
 
 
-	cout << (" Done.\n") ;
+	//cout << (" Done.\n") ;
 
 	return;
 }

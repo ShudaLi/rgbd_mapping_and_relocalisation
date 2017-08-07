@@ -3,7 +3,7 @@
 ###################
 
 IF(MSVC_IDE)
-	FIND_PATH(GLEW_ROOT LICENSE HINTS "C:/all_libs/glew")
+	FIND_PATH(GLEW_ROOT LICENSE HINTS "C:/all_libs/glew_200")
 ELSEIF("${CMAKE_SYSTEM}" MATCHES "Linux")
 	#FIND_PATH(OPENNI_ROOT LICENSE HINTS ~/Software/OpenNI2)
 ELSE()
