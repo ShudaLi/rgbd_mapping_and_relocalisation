@@ -1,12 +1,11 @@
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 
-find_package( OpenCV REQUIRED 
-PATHS "$ENV{OPENCV_NEW}" "C:/Program Files (x86)/OpenCV/Lib" 
-COMPONENTS core imgcodecs features2d  videoio highgui video calib3d cudaarithm 
-cudaimgproc cudawarping cudafeatures2d )
+find_package( OpenCV REQUIRED )
 
 include(${PROJECT_SOURCE_DIR}/cmake/UseOpenNI.cmake)
 include(${PROJECT_SOURCE_DIR}/cmake/UseGLEW.cmake)
+include(${PROJECT_SOURCE_DIR}/cmake/UseQGLViewer.cmake)
+
 include_directories( ${OpenCV_INCLUDE_DIRS} )
 
 if( UNIX )

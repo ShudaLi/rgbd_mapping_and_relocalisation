@@ -111,7 +111,8 @@ std::ostream& operator << ( std::ostream& os, const std::list< T >& l_ )
 
 #ifdef  INFO
 // based on boost stringize.hpp
-#define PRINT( a ) std::cout << BOOST_PP_STRINGIZE( a ) << " = " << std::endl << (a) << std::flush << std::endl;
+#define PRINT( a ) 
+//std::cout << BOOST_PP_STRINGIZE( a ) << " = " << std::endl << (a) << std::flush << std::endl;
 #define PRINTSTR( a ) std::cout << a << std::endl << std::flush;
 #else
 #define PRINT( a ) 

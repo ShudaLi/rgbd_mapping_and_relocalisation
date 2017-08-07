@@ -170,7 +170,7 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 		camera()->setPosition(qglviewer::Vec(0, 0, 0));
 		camera()->setUpVector(qglviewer::Vec(0, -1, 0));
 		camera()->setViewDirection(qglviewer::Vec(0, 0, 1));
-		updateGL(); // Refres
+		//updateGL(); // Refres
 
 #ifdef INACCURATE_METHOD_0
 		Affine3f prj_w_t_c; _pData->_pTracker->getCurrentProjectionMatrix(&prj_w_t_c);
@@ -181,7 +181,7 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 		camera()->setPosition(qglviewer::Vec(pos(0), pos(1), pos(2)));
 		camera()->setUpVector(qglviewer::Vec(upv(0), upv(1), upv(2)));
 		camera()->setViewDirection(qglviewer::Vec(vdr(0), vdr(1), vdr(2)));
-		updateGL(); // Refresh display
+		//updateGL(); // Refresh display
 #endif
 
 #ifdef INACCURATE_METHOD_1
@@ -194,7 +194,7 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 		GLdouble mvm[16];
 		glGetDoublev(GL_MODELVIEW_MATRIX, mvm);
 		camera()->setFromModelViewMatrix(mvm);
-		updateGL(); // Refresh display
+		//updateGL(); // Refresh display
 #endif
 	}
 	else if (pEvent_->key() == Qt::Key_BracketLeft)
@@ -209,7 +209,7 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 		camera()->setPosition(qglviewer::Vec(0, 0, 0));
 		camera()->setUpVector(qglviewer::Vec(0, -1, 0));
 		camera()->setViewDirection(qglviewer::Vec(0, 0, 1));
-		updateGL(); // Refresh display
+		//updateGL(); // Refresh display
 	}
 	else if (pEvent_->key() == Qt::Key_BracketRight)
 	{
@@ -223,12 +223,12 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 		//camera()->setPosition(qglviewer::Vec(0, 0, 0));
 		//camera()->setUpVector(qglviewer::Vec(0, -1, 0));
 		//camera()->setViewDirection(qglviewer::Vec(0, 0, 1));
-		updateGL(); // Refresh display
+		//updateGL(); // Refresh display
 	}
 	else if (pEvent_->key() == Qt::Key_1)
 	{
 		_bShowText = !_bShowText;
-		updateGL(); // Refresh display
+		//updateGL(); // Refresh display
 	}
 	else if (pEvent_->key() == Qt::Key_2)
 	{
@@ -239,72 +239,72 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 		//Matrix4d mTmp = mModelView.cast<double>(); 
 		//mTmp.linear().transposeInPlace();
 		//camera()->setFromModelViewMatrix(mTmp.data());
-		//updateGL(); // Refresh display
+		////updateGL(); // Refresh display
 	}
 	else if (pEvent_->key() == Qt::Key_4 && !(pEvent_->modifiers() & Qt::ShiftModifier)){
 		_pData->switchShowTexts();
-		updateGL(); // Refresh display
+		//updateGL(); // Refresh display
 	}
 	else if (pEvent_->key() == Qt::Key_5) {
 		_pData->switchShowMarkers();
-		updateGL(); // Refresh display
+		//updateGL(); // Refresh display
 	}
 	else if (pEvent_->key() == Qt::Key_6) {
 		//_pData->switchShowMatchedFeaturesForRelocalisation();
-		updateGL(); // Refresh display
+		//updateGL(); // Refresh display
 	}
 	else if (pEvent_->key() == Qt::Key_7) {
 		_pData->switchShowSurfaces();
-		updateGL(); // Refresh display
+		//updateGL(); // Refresh display
 	}
 	else if (pEvent_->key() == Qt::Key_8) {
 		_pData->switchShowVoxels();
-		updateGL(); // Refresh display
+		//updateGL(); // Refresh display
 	}
 	else if (pEvent_->key() == Qt::Key_9) {
 		//_pData->switchPyramid();
 		_pData->_nNormalMap++;
 		_pData->_nNormalMap %= 3;
-		updateGL(); // Refresh display
+		//updateGL(); // Refresh display
 	}
 	else if (pEvent_->key() == Qt::Key_L && !(pEvent_->modifiers() & Qt::ShiftModifier)) {
 		_pData->switchLighting();
-		updateGL(); // Refresh display
+		//updateGL(); // Refresh display
 	}
 	else if (pEvent_->key() == Qt::Key_F2) {
 		_pData->switchImgPlane();
-		updateGL();
+		//updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_F3) {
 		_pData->switchReferenceFrame();
-		updateGL();
+		//updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_F4){
 		_pData->switchCurrentFrame();
-		updateGL();
+		//updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_F5){
 		_pData->switchCameraPath();
-		updateGL();
+		//updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_F6){
 		_pData->switchShowCamera();
-		updateGL();
+		//updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_F7){
 		_pData->switchShowVisualRay();
-		updateGL();
+		//updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_F8){
 		_pData->_pKinect->_bFast = !_pData->_pKinect->_bFast;
 		_pData->switchVoxelLevel();
-		updateGL();
+		//updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_F9){
 		//_pData->switchSphere();
 		_pData->_pKinect->_nRawDataProcessingMethod++;
 		_pData->_pKinect->_nRawDataProcessingMethod%=3;
-		updateGL();
+		//updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_R && !(pEvent_->modifiers() & Qt::ShiftModifier)){
 		//if (_pData->_strStage.compare("Relocalisation_Only")){//if Relocalisation_Only no need to exportGlobalModel()
@@ -316,28 +316,28 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 		//_pData->exportRelativeGTworld2Userworld();
 		_pData->loadFromYml();
 		_pData->reset();
-		updateGL();
+		//updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_C && !(pEvent_->modifiers() & Qt::ShiftModifier)){
 		//lower c
 		_pData->exportGlobalModel();
-		updateGL();
+		//updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_C && (pEvent_->modifiers() & Qt::ShiftModifier)){
 		//upper C
 		_pData->importGlobalModel();
 		//_pData->importVolume();
 		//_pData->switchCapturing();
-		updateGL();
+		//updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_S && !(pEvent_->modifiers() & Qt::ShiftModifier)){
 		_pData->switchCapturing();
 		//_nStatus = (_nStatus&(~VideoSourceKinect::MASK_RECORDER))|VideoSourceKinect::DUMP_RECORDING;
-		updateGL();
+		//updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_T && !(pEvent_->modifiers() & Qt::ShiftModifier)){
 		_pData->_pTracker->_bTrackingOnly = !_pData->_pTracker->_bTrackingOnly;
-		updateGL();
+		//updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_P && !(pEvent_->modifiers() & Qt::ShiftModifier)){
 		/*if ((_nStatus&VideoSourceKinect::MASK1) == VideoSourceKinect::PAUSE){
@@ -346,7 +346,7 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 		_nStatus = (_nStatus&(~VideoSourceKinect::MASK1))|VideoSourceKinect::PAUSE;
 		}*/
 		_pData->switchCapturing();
-		updateGL();
+		//updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_P && (pEvent_->modifiers() & Qt::ShiftModifier)){
 		/*if ((_nStatus&VideoSourceKinect::MASK1) == VideoSourceKinect::PAUSE){
@@ -355,16 +355,17 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 		_nStatus = (_nStatus&(~VideoSourceKinect::MASK1))|VideoSourceKinect::PAUSE;
 		}*/
 		_pData->switchContinuous();
-		updateGL();
+		//updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_M && (pEvent_->modifiers() & Qt::ShiftModifier)) {
+		//uppercase m
 		/*if ((_nStatus&VideoSourceKinect::MASK1) == VideoSourceKinect::PAUSE){
 		_nStatus = (_nStatus&(~VideoSourceKinect::MASK1))|VideoSourceKinect::CONTINUE;
 		}else if ((_nStatus&VideoSourceKinect::MASK1) == VideoSourceKinect::CONTINUE){
 		_nStatus = (_nStatus&(~VideoSourceKinect::MASK1))|VideoSourceKinect::PAUSE;
 		}*/
 		_pData->_pCubicGrids->gpuMarchingCubes();
-		updateGL();
+		//updateGL();
 	}
 	else if (pEvent_->key() == Qt::Key_Escape && !(pEvent_->modifiers() & Qt::ShiftModifier)){
 		QCoreApplication::instance()->quit();

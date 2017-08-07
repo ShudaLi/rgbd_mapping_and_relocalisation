@@ -50,7 +50,7 @@
 
 //openncv
 #include <opencv2/opencv.hpp>
-#include <opencv2/xfeatures2d/nonfree.hpp>
+// #include <opencv2/xfeatures2d/nonfree.hpp>
 #include <opencv2/xfeatures2d.hpp>
 #include <opencv2/cudaarithm.hpp>
 #include <opencv2/cudaimgproc.hpp>
@@ -88,6 +88,7 @@
 #include "Converters.hpp"
 
 using namespace cv;
+using namespace cv::xfeatures2d;
 using namespace cv::cuda;
 using namespace std;
 using namespace btl::kinect;
@@ -427,14 +428,18 @@ void CKinFuTracker::storeCurrFrame(CRGBDFrame::tp_ptr pCurFrame_){
 		for (int i = 0; i < _nFeatureScale; i++)
 		{
 			_gpu_pts_prev.push_back(GpuMat());
-			if (_gpu_keypoints_curr[i].empty() || _gpu_descriptor_curr[i].empty() || _gpu_pts_curr[i].empty() || _gpu_nls_curr[i].empty() || _gpu_mds_curr[i].empty()){
+			if (_gpu_keypoints_curr[i].empty() || _gpu_descriptor_curr[i].empty() || 
+				_gpu_pts_curr[i].empty() || _gpu_nls_curr[i].empty() || 
+				_gpu_mds_curr[i].empty())
+			{
 				_gpu_key_points_prev[i].release();
 				_gpu_descriptor_prev[i].release();
 				_gpu_pts_prev[i].release();
 				_gpu_nls_prev[i].release();
 				_gpu_mds_prev[i].release();
 			}
-			else{
+			else
+			{
 				_gpu_key_points_prev[i] = _gpu_keypoints_curr[i].clone();
 				_gpu_descriptor_prev[i] = _gpu_descriptor_curr[i].clone();
 				btl::device::cuda_transform_local2world(R_.data(), T_.data(), &_gpu_pts_curr[i], &_gpu_nls_curr[i], &_gpu_mds_curr[i]);

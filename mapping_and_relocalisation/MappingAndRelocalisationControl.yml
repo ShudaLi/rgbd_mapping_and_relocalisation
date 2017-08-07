@@ -1,10 +1,10 @@
 %YAML:1.0
 
-Global_folder: "..\\live_kinect\\global_model\\"
+Global_folder: "..//..//live_kinect//global_model//"
 #the location stores the global map, the TSDF volume with the concise key point sets
-Result_folder: "..\\live_kinect\\tracking_results\\"
+Result_folder: "..//..//live_kinect//tracking_results//"
 #the location stores the camera poses over time
-CamParamPathFileName: "..\\..\\data\\Xtion"
+CamParamPathFileName: "..//..//data//Xtion"
 #sensor internal parameters
 
 Ransac_iterations_tracking: 100
@@ -16,9 +16,9 @@ uResolution: 1
 uPyrHeight: 4
 bUseNIRegistration: 1
 uCubicGridResolution: [ 400, 400, 400 ]
-fVolumeSize: 3
+fVolumeSize: 5
 Feature_scales: 1
-InitialCamPos: [ 1.5, 1.5, .5 ]
+InitialCamPos: [ 2.5, 2.5, 1.5 ]
 bDisplayImage: 0
 bLightOn: 1
 nMode: 1

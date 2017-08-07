@@ -829,7 +829,7 @@ double CCubicGrids::verifyPoseHypothesesAndRefine(CRGBDFrame::tp_ptr pCurFrame_,
 		btl::utility::convertPrj2Rnt(v_k_hypothese_poses[i], &eimRw, &eivTw);
 
 		float s = eimRw.sum();
-		if (fabs(s) < 0.0001 || std::isnan<float>(s)){
+		if (fabs(s) < 0.0001 || s!=s /*std::isnan<float>(s)*/){
 			energy_ICP.at<double>(0, i) = numeric_limits<double>::max();
 			v_refined_R.push_back(Matrix3f::Zero());
 			v_refined_t.push_back(Vector3f::Zero());
@@ -886,7 +886,7 @@ double CCubicGrids::verifyPoseHypothesesAndRefine(CRGBDFrame::tp_ptr pCurFrame_,
 		double dICPEnergyFinal = numeric_limits<double>::max();
 		Matrix3f eimRw = *pRw_; Vector3f eivTw = *pTw_;
 		float s = eimRw.sum();
-		if (fabs(s) > 0.0001 && !std::isnan<float>(s)){
+		if (fabs(s) > 0.0001 && s==s ){//!std::isnan<float>(s)){
 			//ICP -- refine R,t
 			Eigen::Vector4i eivIter;
 			switch (nICPMethod_){
@@ -992,6 +992,23 @@ void CCubicGrids::gpuMarchingCubes(){
 	_normals_buffer.colRange(0, _total_vertexes / 3).download(_normals);
 	pcl::device::unbindTextures();
 
+	exportCSV();
+
+	return;
+}
+
+
+void CCubicGrids::exportCSV() const {
+	ofstream myfile;
+	myfile.open("export.asc");
+	for (int t = 0; t < _normals.cols; t++)
+	{
+		const float* vv = _triangles.ptr<float>() + t * 3 * 3;
+		if (abs(*vv) > 0.01) {
+			myfile << *vv << ", " << *(vv + 1) << ", " << *(vv + 2) << endl;
+		}
+	}
+	myfile.close();
 	return;
 }
 

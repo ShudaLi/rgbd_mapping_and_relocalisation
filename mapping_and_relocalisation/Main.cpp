@@ -63,9 +63,9 @@ int main(int argc, char** argv)
 
   // Instantiate the viewers.
   CMultiViewer global_view(string("global_view"),_pData, vSplit1, NULL);
-  CMultiViewer camera_view(string("rgb_view"),_pData, vSplit1, &global_view);
-  CMultiViewer rgb_view	(string("camera_view"),   _pData, vSplit2, &global_view);
-  CMultiViewer depth_view (string("depth_view"), _pData, vSplit2, &global_view);
+  CMultiViewer camera_view(string("rgb_view"),_pData, vSplit1, (const QGLWidget*)&global_view);
+  CMultiViewer rgb_view	(string("camera_view"),   _pData, vSplit2, (const QGLWidget*)&global_view);
+  CMultiViewer depth_view (string("depth_view"), _pData, vSplit2, (const QGLWidget*)&global_view);
 
 #if QT_VERSION < 0x040000
   // Set the viewer as the application main widget.
