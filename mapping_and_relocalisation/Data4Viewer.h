@@ -42,7 +42,6 @@ public:
 	virtual void switchLighting() { _pGL->_bEnableLighting = !_pGL->_bEnableLighting; }
 	virtual void switchImgPlane() { _pGL->_bDisplayCamera = !_pGL->_bDisplayCamera; }
 	virtual void switchReferenceFrame() { _bRenderReference = !_bRenderReference; }
-	virtual void switchTrackOnly() { _bTrackOnly = !_bTrackOnly; }
 	virtual void switchCameraPath() { _bIsCameraPathOn = !_bIsCameraPathOn; }
 	virtual void switchCurrentFrame() { _bIsCurrFrameOn = !_bIsCurrFrameOn; }
 	virtual void switchContinuous() { _bContinuous = !_bContinuous; }
@@ -61,7 +60,6 @@ public:
 	virtual const string& featureName() { return _strFeatureName; }
 	virtual const CKinFuTracker::tp_shared_ptr getTrackerPtr() { return _pTracker; }
 	virtual const bool isCapturing() const { return _bCapture; }
-	virtual const bool isTrackOnly() const { return _bTrackOnly; }
 
 	virtual void exportGlobalModel();
 	virtual void importGlobalModel();
@@ -108,7 +106,6 @@ public:
 	bool _bRenderReference;
 	bool _bCapture; // controled by c
 	bool _bContinuous; 
-	bool _bTrackOnly;
 	bool _bViewLocked; // controlled by 2
 	//bool _bShowRelocalizaitonFeatures;
 	bool _bShowVoxels;

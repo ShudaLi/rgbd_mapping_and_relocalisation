@@ -25,8 +25,8 @@
 
 #include <opencv2/cudaarithm.hpp>
 //#include <opencv2/core/gpu_types.hpp>
-#include <opencv2/cudev/common.hpp>
-#include <opencv2/core/cuda/utility.hpp>
+//#include <opencv2/cudev/common.hpp>
+//#include <opencv2/core/cuda/utility.hpp>
 //#include "cv/common.hpp" //copied from opencv
 #include "OtherUtil.hpp"
 #include <math_constants.h>
@@ -335,8 +335,8 @@ GpuMat cuda_icp_fr_2_fr(const Intr& sCamIntr_, float fDistThres_, float fCosAngl
 
 	dim3 block (SDeviceICPEnergyRegistration::CTA_SIZE_X, SDeviceICPEnergyRegistration::CTA_SIZE_Y);
     dim3 grid (1, 1, 1);
-	grid.x = cv::cudev::divUp ( cvgmVMapWorldPrev_.cols, block.x );
-	grid.y = cv::cudev::divUp ( cvgmVMapWorldPrev_.rows, block.y );
+	grid.x = cv::divUp ( cvgmVMapWorldPrev_.cols, block.x );
+	grid.y = cv::divUp ( cvgmVMapWorldPrev_.rows, block.y );
 		
 	GpuMat cvgmBuf(STranformReduction::TOTAL, grid.x * grid.y, CV_64FC1); cvgmBuf.setTo( 0. );
 	//the # of rows is STranformReduction::TOTAL, 27, which is calculated in this way:
@@ -407,8 +407,8 @@ double calc_energy_icp_fr_2_fr( const Intr& sCamIntr_, float fDistThres_, float 
 
 	dim3 block(SDeviceICPEnergyRegistration::CTA_SIZE_X, SDeviceICPEnergyRegistration::CTA_SIZE_Y);
 	dim3 grid(1, 1, 1);
-	grid.x = cv::cudev::divUp(cvgmVMapWorldPrev_.cols, block.x);
-	grid.y = cv::cudev::divUp(cvgmVMapWorldPrev_.rows, block.y);
+	grid.x = cv::divUp(cvgmVMapWorldPrev_.cols, block.x);
+	grid.y = cv::divUp(cvgmVMapWorldPrev_.rows, block.y);
 
 	GpuMat cvgmE(1, grid.x * grid.y, CV_64FC1); cvgmE.setTo(0.);
 	sICP._cvgmE = cvgmE;

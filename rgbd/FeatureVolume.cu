@@ -27,7 +27,7 @@
 #include <thrust/sort.h> 
 
 #include <opencv2/cudaarithm.hpp>
-#include <opencv2/core/cuda/common.hpp>
+//#include <opencv2/core/cuda/common.hpp>
 #include "pcl/device.hpp"
 #include "pcl/vector_math.hpp"
 #include "FeatureVolume.cuh"

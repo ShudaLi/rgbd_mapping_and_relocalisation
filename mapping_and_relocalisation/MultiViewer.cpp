@@ -98,7 +98,7 @@ void CMultiViewer::draw()
 			}
 
 			if( _pData->isCapturing() )	{
-				if (!_pData->_bTrackOnly){
+				if (!_pData->_pTracker->_bTrackingOnly){
 					float aColor[4] = {1.f,0.f,0.f,1.f}; glColor4fv(aColor);
 					renderText(230,20, QString("mapping"), QFont("Arial", 13, QFont::Normal));
 				}
@@ -335,9 +335,9 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 		//_nStatus = (_nStatus&(~VideoSourceKinect::MASK_RECORDER))|VideoSourceKinect::DUMP_RECORDING;
 		//updateGL();
 	}
-	else if (pEvent_->key() == Qt::Key_T && !(pEvent_->modifiers() & Qt::ShiftModifier)){
+	else if (pEvent_->key() == Qt::Key_T /*&& !(pEvent_->modifiers() & Qt::ShiftModifier)*/){
 		_pData->_pTracker->_bTrackingOnly = !_pData->_pTracker->_bTrackingOnly;
-		//updateGL();
+		update();
 	}
 	else if (pEvent_->key() == Qt::Key_P && !(pEvent_->modifiers() & Qt::ShiftModifier)){
 		/*if ((_nStatus&VideoSourceKinect::MASK1) == VideoSourceKinect::PAUSE){
@@ -346,7 +346,7 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 		_nStatus = (_nStatus&(~VideoSourceKinect::MASK1))|VideoSourceKinect::PAUSE;
 		}*/
 		_pData->switchCapturing();
-		//updateGL();
+		update();
 	}
 	else if (pEvent_->key() == Qt::Key_P && (pEvent_->modifiers() & Qt::ShiftModifier)){
 		/*if ((_nStatus&VideoSourceKinect::MASK1) == VideoSourceKinect::PAUSE){
@@ -355,7 +355,7 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 		_nStatus = (_nStatus&(~VideoSourceKinect::MASK1))|VideoSourceKinect::PAUSE;
 		}*/
 		_pData->switchContinuous();
-		//updateGL();
+		update();
 	}
 	else if (pEvent_->key() == Qt::Key_M && (pEvent_->modifiers() & Qt::ShiftModifier)) {
 		//uppercase m
@@ -365,7 +365,7 @@ void CMultiViewer::keyPressEvent(QKeyEvent *pEvent_)
 		_nStatus = (_nStatus&(~VideoSourceKinect::MASK1))|VideoSourceKinect::PAUSE;
 		}*/
 		_pData->_pCubicGrids->gpuMarchingCubes();
-		//updateGL();
+		update();
 	}
 	else if (pEvent_->key() == Qt::Key_Escape && !(pEvent_->modifiers() & Qt::ShiftModifier)){
 		QCoreApplication::instance()->quit();

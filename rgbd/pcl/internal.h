@@ -98,6 +98,11 @@ namespace pcl
 		return (* reinterpret_cast<D*>(matx.data ()));
 	}
 
+	template<class D, typename T> D& device_cast(T* data)
+	{
+		return (*reinterpret_cast<D*>(data));
+	}
+
   }//device
 }//pcl
 

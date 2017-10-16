@@ -472,10 +472,10 @@ void CVideoSourceKinect::gpuBuildPyramidUseNICVm( ){
 
 void CVideoSourceKinect::gpu_build_pyramid_dynamic_bilatera() {
 
-	if (_bMapUndistortionOn) {
-		btl::device::undistortion_depth(_calibXYxZ[_uResolution], _mask[_uResolution], _vRegularLocations[0], 
-			                            _vRegularLocations[1] - _vRegularLocations[0], &_gpu_depth);
-	}
+	//if (_bMapUndistortionOn) {
+	//	btl::device::undistortion_depth(_calibXYxZ[_uResolution], _mask[_uResolution], _vRegularLocations[0], 
+	//		                            _vRegularLocations[1] - _vRegularLocations[0], &_gpu_depth);
+	//}
 
 	if (fabs(_fScaleRGB - 1.f) > 0.00005f) { cuda::resize(_gpu_rgb, _gpu_rgb, Size(), _fScaleRGB, _fScaleRGB, INTER_LINEAR); }
 	if (fabs(_fScaleDepth - 1.f) > 0.00005f) { cuda::resize(_gpu_depth, _gpu_depth, Size(), _fScaleDepth, _fScaleDepth, INTER_LINEAR); }

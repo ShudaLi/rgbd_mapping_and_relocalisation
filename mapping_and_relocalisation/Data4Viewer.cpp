@@ -117,7 +117,6 @@ CData4Viewer::CData4Viewer(){
 	_bLightOn = false;
 	_bCapture = false;
 	_bContinuous = false;
-	_bTrackOnly = false;
 	_bShowSurfaces = false;
 	_bShowCamera = false;
 	_bShowVoxels = false;

@@ -25,8 +25,8 @@
 #include <cuda.h>
 
 #include <opencv2/opencv.hpp>
-#include <opencv2/core/cuda/common.hpp>
-#include <opencv2/cudev/functional/functional.hpp>
+//#include <opencv2/core/cuda/common.hpp>
+//#include <opencv2/cudev/functional/functional.hpp>
 #include <opencv2/core/utility.hpp>
 #include <opencv2/cudaarithm.hpp>
 #include <opencv2/cudaarithm.hpp>
@@ -518,7 +518,7 @@ int cuda_collect_point_pairs_2nn( const float fMatchThreshold_, const float& fPe
 
 	dim3 block(128,1,1);
     dim3 grid(1,1,1);
-    grid.x = cv::cudev::divUp( cvgmC2PPairs_.cols, block.x );
+    grid.x = cv::divUp( cvgmC2PPairs_.cols, block.x );
 	
 	kernelCollect2NN<<<grid, block>>>( sDC );
 	cudaSafeCall ( cudaGetLastError () );
@@ -954,7 +954,7 @@ void cuda_calc_adjacency_mt( const GpuMat& global_pts_, const GpuMat& curr_pts_,
 	
 	dim3 block(32,32,1);
     dim3 grid(1,1,1);
-    grid.x = grid.y = cv::cudev::divUp( cols, block.x );
+    grid.x = grid.y = cv::divUp( cols, block.x );
 	
 	kernelCalcAM<<<grid, block>>>( sDCAM );
 	//cudaSafeCall ( cudaGetLastError () );
@@ -988,7 +988,7 @@ void cuda_calc_adjacency_mt_binary ( const GpuMat& global_pts_, const GpuMat& cu
 	
 	dim3 block(32,32,1);
     dim3 grid(1,1,1);
-    grid.x = grid.y = cv::cudev::divUp( cols, block.x );
+    grid.x = grid.y = cv::divUp( cols, block.x );
 	
 	kernelCalcAMBinary<<<grid, block>>>( sDCAM );
 	//cudaSafeCall ( cudaGetLastError () );
@@ -1029,7 +1029,7 @@ void cuda_collect_all(const GpuMat& global_pts_, const GpuMat& curr_pts_,
 	
 	dim3 block(16, 16, 1);
 	dim3 grid(1, 1, 1);
-	grid.x = grid.y = cv::cudev::divUp(cols, block.x);
+	grid.x = grid.y = cv::divUp(cols, block.x);
 
 	kernelCalcPoses <<<grid, block >>>(sDCAM);
 	//cudaSafeCall(cudaDeviceSynchronize());
@@ -1112,7 +1112,7 @@ void cuda_calc_common_ratio(const int r, const int c, const GpuMat& votes_, cons
 
 	dim3 block(32, 32, 1);
 	dim3 grid(1, 1, 1);
-	grid.x = grid.y = cv::cudev::divUp(ptr_vote_bit_flags_.rows, block.x);
+	grid.x = grid.y = cv::divUp(ptr_vote_bit_flags_.rows, block.x);
 
 	kernel_calc_common<< <grid, block >> >( obj_calc_hamming );
 	//cudaSafeCall(cudaDeviceSynchronize());
@@ -1366,7 +1366,7 @@ vector<int> cuda_extract_key_points(  const pcl::device::Intr& intr, const float
 	//extract
 	dim3 block(256,1,1);
     dim3 grid(1,1,1);
-    grid.x = cv::cudev::divUp( key_points_.cols, block.x );
+    grid.x = cv::divUp( key_points_.cols, block.x );
 	kernel_extract_multi<<<grid, block>>>( sdEMF, total.ptr<int>() );
 	cudaSafeCall ( cudaGetLastError () );
 	//cudaSafeCall ( cudaDeviceSynchronize () );
@@ -1440,7 +1440,7 @@ void cuda_apply_1to1_constraint(const GpuMat& gpu_credibility_, const GpuMat& gp
 
 	dim3 block(16, 16);
 	dim3 grid(1, 1, 1);
-	grid.x = grid.y = cv::cudev::divUp(number, block.x);
+	grid.x = grid.y = cv::divUp(number, block.x);
 	kernel_fill_combination <<< grid, block >>>(gpu_idx_, gpu_credibility_, gpu_flag, number);
 	//cudaSafeCall(cudaGetLastError());
 	//cudaSafeCall(cudaDeviceSynchronize());
@@ -1506,7 +1506,7 @@ void cuda_apply_1to1_constraint_binary(const GpuMat& credibility_, const GpuMat&
 
 	dim3 block(16, 16);
 	dim3 grid(1, 1, 1);
-	grid.x = grid.y = cv::cudev::divUp(number, block.x);
+	grid.x = grid.y = cv::divUp(number, block.x);
 	kernel_fill_combination_binary << < grid, block >> >(gpu_idx_, credibility_, geometry_, gpu_flag, number);
 	//cudaSafeCall(cudaGetLastError());
 	//cudaSafeCall(cudaDeviceSynchronize());
@@ -1565,8 +1565,8 @@ void cuda_select_inliers_from_am(const GpuMat& gpu_credibility_, const GpuMat& g
 
 	dim3 block(4, 64);
 	dim3 grid(1, 1, 1);
-	grid.x = cv::cudev::divUp(nCols, block.y);
-	grid.y = cv::cudev::divUp(TotalTrials_, block.x);
+	grid.x = cv::divUp(nCols, block.y);
+	grid.y = cv::divUp(TotalTrials_, block.x);
 	//kernel_select_inliers <<< grid, block >>>(gpu_credibility_, gpu_column_idx_, *p_inliers_, *p_node_numbers_);
 	kernel_select_inliers <<< grid, block >>>(gpu_credibility_, gpu_column_idx_, *p_inliers_, mask_counting );
 	cudaSafeCall(cudaGetLastError());
@@ -1606,6 +1606,8 @@ __global__ void kernel_select_inliers_atomic(PtrStepSz<float> credibility_, PtrS
 }
 
 void cuda_select_inliers_from_am(const GpuMat& gpu_credibility_, const GpuMat& gpu_column_idx_, float fExpThreshold_, int TotalTrials_, int ChainLength_, GpuMat* p_inliers_, GpuMat* p_node_numbers_){
+	if (TotalTrials_ == 0) return;
+
 	p_node_numbers_->create(TotalTrials_, 1, CV_32SC1); p_node_numbers_->setTo(0);
 
 	cudaSafeCall(cudaMemcpyToSymbol(_fExpThreshold, &fExpThreshold_, sizeof(float)));
@@ -1614,8 +1616,8 @@ void cuda_select_inliers_from_am(const GpuMat& gpu_credibility_, const GpuMat& g
 
 	dim3 block(4, 64);
 	dim3 grid(1, 1, 1);
-	grid.x = cv::cudev::divUp(nCols, block.y);
-	grid.y = cv::cudev::divUp(TotalTrials_, block.x);
+	grid.x = cv::divUp(nCols, block.y);
+	grid.y = cv::divUp(TotalTrials_, block.x);
 	kernel_select_inliers_atomic <<< grid, block >>>(gpu_credibility_, gpu_column_idx_, *p_inliers_, *p_node_numbers_);
 	cudaSafeCall(cudaGetLastError());
 	//cudaSafeCall(cudaDeviceSynchronize());
@@ -1639,8 +1641,8 @@ void select_rows(const GpuMat& gpu_credibility_, const GpuMat& gpu_column_idx_, 
 
 	dim3 block(4, 64);
 	dim3 grid(1, 1, 1);
-	grid.x = cv::cudev::divUp(TotalTrials_, block.x);
-	grid.y = cv::cudev::divUp(gpu_credibility_.cols, block.y);
+	grid.x = cv::divUp(TotalTrials_, block.x);
+	grid.y = cv::divUp(gpu_credibility_.cols, block.y);
 	kernel_copy_selected_rows <<< grid, block >>>(gpu_credibility_, gpu_column_idx_, *p_selected_credibility_);
 	//cudaSafeCall(cudaGetLastError());
 	//cudaSafeCall(cudaDeviceSynchronize());
@@ -1690,8 +1692,8 @@ void cuda_select_inliers_from_am_2(const GpuMat& gpu_credibility_, const GpuMat&
 
 	dim3 block(4, 64);
 	dim3 grid(1, 1, 1);
-	grid.x = cv::cudev::divUp(TotalTrials_, block.x);
-	grid.y = cv::cudev::divUp(ChainLength_, block.y);
+	grid.x = cv::divUp(TotalTrials_, block.x);
+	grid.y = cv::divUp(ChainLength_, block.y);
 	kernel_select_inliers_from_sorted << < grid, block >> >(gpu_credibility_, gpu_column_idx_, sorted_idx, *p_inliers_, *p_node_numbers_);
 	//cudaSafeCall(cudaGetLastError());
 	//cudaSafeCall(cudaDeviceSynchronize());

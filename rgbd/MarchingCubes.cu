@@ -5,7 +5,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/cudaarithm.hpp>
-#include <opencv2/core/cuda/common.hpp>
+//#include <opencv2/core/cuda/common.hpp>
 
 #include "pcl/device.hpp"
 #include "pcl/limits.hpp"

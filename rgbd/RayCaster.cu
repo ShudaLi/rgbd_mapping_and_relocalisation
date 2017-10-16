@@ -24,7 +24,7 @@
 #endif
 #include <opencv2/cudaarithm.hpp>
 #include <opencv2/cudaarithm.hpp>
-#include <opencv2/core/cuda/common.hpp>
+//#include <opencv2/core/cuda/common.hpp>
 
 
 #include "pcl/limits.hpp"
@@ -536,7 +536,7 @@ void cuda_ray_cast ( const pcl::device::Intr& intr, const pcl::device::Mat33& Rw
 	rc.nmap = *pNMap_;
 
 	dim3 block (RayCaster::CTA_SIZE_X, RayCaster::CTA_SIZE_Y);
-	dim3 grid (divUp (pVMap_->cols, block.x), device::divUp (pVMap_->rows, block.y));
+	dim3 grid (divUp (pVMap_->cols, block.x), divUp (pVMap_->rows, block.y));
 
 	rayCastKernel<<<grid, block>>>(rc);
 	cudaSafeCall(cudaDeviceSynchronize());

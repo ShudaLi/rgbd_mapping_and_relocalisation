@@ -66,7 +66,6 @@ CDataLive::CDataLive()
 	_bDisplayImage = false;
 	_bLightOn = false;
 	_bCapture = false;
-	_bTrackOnly = false;
 	_bShowSurfaces = false;
 	_bIsCameraPathOn = false;
 	_bRenderSphere = false;
@@ -230,7 +229,6 @@ void CDataLive::updatePF(){
 
 		if (!_strStage.compare("Tracking_n_Mapping")){
 			_pTracker->_nStage = btl::Tracking_n_Mapping;
-			_pTracker->_bTrackingOnly = _bTrackOnly;
 			_pTracker->tracking(&*_pKinect->_pCurrFrame);
 			//if (true) storeResultPose();
 		}

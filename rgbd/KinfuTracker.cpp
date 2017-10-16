@@ -925,8 +925,8 @@ void CKinFuTracker::findCorrespondences( const vector<GpuMat>& gpu_descriptors_t
 	{
 		// read out hamming distance from distance
 		Mat hamming_distance_reloc; _gpu_hamming_distance_reloc.colRange(0, _nAppearanceMatched).download(hamming_distance_reloc);//float2 format
-		_fWeight = 1.f;
 		Mat credability;
+		_fWeight = 1.f;
 		credability.create(_nAppearanceMatched, _nAppearanceMatched, CV_32FC1);	credability.setTo(0.f);
 		for (int P_idx = 0; P_idx < _nAppearanceMatched; P_idx++) {
 			//get hamming distance
@@ -1214,7 +1214,17 @@ void CKinFuTracker::gpuExtractCorrespondencesMaxScore_binary(const GpuMat& hammi
 
 	const int ChainLength = _aMaxChainLength[_nResolution] * 10; //max correct chain out of candidate matches, inlier ratio times total # of matches
 	const int TotalTrials = gpu_credibility_.cols/2; //each trail may run par
-
+	if (TotalTrials == 0) {
+		//v_selected_world.push_back(Mat());
+		//v_nls_selected_world.push_back(Mat());
+		//v_selected_curr.push_back(Mat());
+		//v_nls_selected_curr.push_back(Mat());
+		//v_selected_2d_curr.push_back(Mat());
+		//v_selected_bv_curr.push_back(Mat());
+		//v_selected_wg_curr.push_back(Mat());
+		//v_selected_inliers.push_back(Mat());
+		return;
+	}
 	vector<Mat> v_selected_world, v_nls_selected_world;
 	vector<Mat> v_selected_curr, v_nls_selected_curr;
 	vector<Mat> v_selected_2d_curr;
@@ -1237,7 +1247,8 @@ void CKinFuTracker::gpuExtractCorrespondencesMaxScore_binary(const GpuMat& hammi
 
 	GpuMat inliers, gpu_node_numbers;  btl::device::cuda_select_inliers_from_am(gpu_credibility_, gpu_column_idx, _fExpThreshold, TotalTrials, ChainLength, &inliers, &gpu_node_numbers);
 	//GpuMat inliers, gpu_node_numbers;  btl::device::cuda_select_inliers_from_am_2(gpu_credibility_, gpu_column_idx, _fExpThreshold, TotalTrials, ChainLength, &inliers, &gpu_node_numbers);
-	gpu_node_numbers.download(node_numbers);
+	if(!gpu_node_numbers.empty())
+		gpu_node_numbers.download(node_numbers);
 	for (int nTrial = 0; nTrial < TotalTrials; nTrial++){
 		int nSelected = *node_numbers.ptr<int>(nTrial);
 		nSelected = nSelected > ChainLength ? ChainLength : nSelected;
@@ -1287,7 +1298,8 @@ void CKinFuTracker::gpuExtractCorrespondencesMaxScore_binary(const GpuMat& hammi
 	//4. chose the longest matches sequence
 	/////////////////////////////////////////////////////////////////////////////////
 	Mat trail_idx;	sortIdx(node_numbers, trail_idx, CV_SORT_EVERY_COLUMN + CV_SORT_DESCENDING); // rank the trails, the one with the most nodes rank higher
-	for (int i = 0; i < K_; i++) {
+	int nIt = K_ < TotalTrials ? K_ : TotalTrials;
+	for (int i = 0; i < nIt; i++) {
 		int nMaxIdx = trail_idx.at<int>(i, 0);
 		ptr_v_selected_world_->push_back(v_selected_world[nMaxIdx]);
 		ptr_v_nls_selected_world_->push_back(v_nls_selected_world[nMaxIdx]);

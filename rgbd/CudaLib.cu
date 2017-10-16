@@ -229,8 +229,8 @@ void cuda_bilateral_filtering(const cv::cuda::GpuMat& cvgmSrc_, const float& fSi
 	dim3 grid(cv::cuda::device::divUp(cvgmSrc_.cols, block.x), cv::cuda::device::divUp(cvgmSrc_.rows, block.y));
 	//run kernel
 	kernel_bilateral << <grid, block >> >(cvgmSrc_, tmp);
-	//cudaSafeCall( cudaGetLastError () );
-	//cudaSafeCall( cudaDeviceSynchronize() );
+	cudaSafeCall( cudaGetLastError () );
+	cudaSafeCall( cudaDeviceSynchronize() );
 	tmp.copyTo(*pcvgmDst_);
 	//release temporary pointers
 	free(pSigma);
