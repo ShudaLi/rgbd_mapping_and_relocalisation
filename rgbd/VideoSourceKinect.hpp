@@ -136,6 +136,7 @@ protected:
 	// (opencv-default camera reference system convention)
 	Eigen::Vector3f _eivCw;
 	string _cam_param_file;
+	string _cam_param;
 };//class VideoSourceKinect
 
 } //namespace kinect

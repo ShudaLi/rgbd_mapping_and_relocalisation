@@ -95,6 +95,7 @@ CVideoSourceKinect::CVideoSourceKinect (ushort uResolution_, ushort uPyrHeight_,
 
 	_fMtr2Depth = 1000.f;
 	std::cout << " Done. " << std::endl;
+	_cam_param = string("..//..//data//");
 }
 CVideoSourceKinect::~CVideoSourceKinect()
 {
@@ -194,30 +195,37 @@ void CVideoSourceKinect::initKinect()
 
 	// set as the highest resolution 0 for 480x640 
 	
-	//char _serial[100];
-	//int size = sizeof(_serial);
-	//_device.getProperty(openni::DEVICE_PROPERTY_SERIAL_NUMBER, &_serial, &size);
-	//_serial_number = string(_serial);
-	//cout << _serial_number << endl;
+	char _serial[100];
+	int size = sizeof(_serial);
+	_device.getProperty(openni::DEVICE_PROPERTY_SERIAL_NUMBER, &_serial, &size);
+	_serial_number = string(_serial);
+	cout << _serial_number << endl;
+	string path = _cam_param + string(_serial);
+	if (std::experimental::filesystem::exists(path.c_str()))
+	{
+		if (!loadLocation(&_vRegularLocations)){
+			_bMapUndistortionOn = false;
+			return;
+		}
+		cout << "calibration data exits!" << endl;
+		Mat cpuClibXYxZ0, cpuMask0;
+		loadCoefficient(0, _vRegularLocations.size(), &cpuClibXYxZ0, &cpuMask0);
+		_calibXYxZ[0].upload(cpuClibXYxZ0);
+		_mask[0].upload(cpuMask0);
+		_fCutOffDistance = _vRegularLocations.back();
 
-	//Mat cpuClibXYxZ0, cpuMask0;
-	//if (!loadLocation(&_vRegularLocations))
-	//{
-	//	_bMapUndistortionOn = false;
-	//	return;
-	//}
-	//loadCoefficient(0, _vRegularLocations.size(), &cpuClibXYxZ0, &cpuMask0);
-	//_calibXYxZ[0].upload(cpuClibXYxZ0);
-	//_mask[0].upload(cpuMask0);
-	//_fCutOffDistance = _vRegularLocations.back();
+		if (_uResolution == 1) {
+			btl::device::cuda_resize_coeff(_calibXYxZ[0], &_calibXYxZ[1]);
+			cuda::resize(_mask[0], _mask[1], Size(_mask[0].cols / 2, _mask[0].rows / 2));
+		}
+		_bMapUndistortionOn = true;
+	}
+	else {
+		cout << "calibration data does not exit!" << endl;
+		_bMapUndistortionOn = false;
+	}
 
-	//if (_uResolution == 1) {
-	//	btl::device::cuda_resize_coeff(_calibXYxZ[0], &_calibXYxZ[1]);
-	//	cuda::resize(_mask[0], _mask[1], Size(_mask[0].cols / 2, _mask[0].rows / 2));
-	//}
-
-
-	//cout << (" Done.\n") ;
+	cout << (" Done.\n") ;
 
 	return;
 }
@@ -472,10 +480,10 @@ void CVideoSourceKinect::gpuBuildPyramidUseNICVm( ){
 
 void CVideoSourceKinect::gpu_build_pyramid_dynamic_bilatera() {
 
-	//if (_bMapUndistortionOn) {
-	//	btl::device::undistortion_depth(_calibXYxZ[_uResolution], _mask[_uResolution], _vRegularLocations[0], 
-	//		                            _vRegularLocations[1] - _vRegularLocations[0], &_gpu_depth);
-	//}
+	if (_bMapUndistortionOn) {
+		btl::device::undistortion_depth(_calibXYxZ[_uResolution], _mask[_uResolution], _vRegularLocations[0],
+			_vRegularLocations[1] - _vRegularLocations[0], &_gpu_depth);
+	}
 
 	if (fabs(_fScaleRGB - 1.f) > 0.00005f) { cuda::resize(_gpu_rgb, _gpu_rgb, Size(), _fScaleRGB, _fScaleRGB, INTER_LINEAR); }
 	if (fabs(_fScaleDepth - 1.f) > 0.00005f) { cuda::resize(_gpu_depth, _gpu_depth, Size(), _fScaleDepth, _fScaleDepth, INTER_LINEAR); }
@@ -669,7 +677,7 @@ bool CVideoSourceKinect::loadCoefficient(int nResolution_, int size_, Mat* coeff
 {
 	{
 		ostringstream directory;
-		directory << "..//data//" << _serial_number << "//mask_0.png";
+		directory << _cam_param << _serial_number << "//mask_0.png";
 		*mask_ = imread(directory.str().c_str(), IMREAD_GRAYSCALE);
 	}
 	int nRows, nCols;
@@ -685,7 +693,7 @@ bool CVideoSourceKinect::loadCoefficient(int nResolution_, int size_, Mat* coeff
 	coeff_->create(nCols * nRows, size_, CV_32FC1);
 	ostringstream volume_name;
 
-	volume_name << "..//data//" << _serial_number << "//coefficient_" << nResolution_ << ".nii.gz";
+	volume_name << _cam_param << _serial_number << "//coefficient_" << nResolution_ << ".nii.gz";
 		
 	nifti_image* ptr_nim = nifti_image_read(volume_name.str().c_str(), 1);
 
@@ -701,7 +709,7 @@ bool CVideoSourceKinect::loadLocation(vector<float>* pvLocations_)
 {
 	pvLocations_->clear();
 	ostringstream locName;
-	locName << "..//data//" << _serial_number << "//RegularLocations.yml";
+	locName << _cam_param << _serial_number << "//RegularLocations.yml";
 	if (!std::experimental::filesystem::exists(locName.str().c_str()))
 	{
 		return false;
